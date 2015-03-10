@@ -1,0 +1,23 @@
+{
+	"server": {
+		"http": {
+			"port": [ 8088 ]
+		},
+		"tcp": {
+			"port": [ 2023 ]
+		},
+		"cluster": {
+			"heartbeat":		10000
+		}
+	},
+	"client": {
+		"statsd": {
+			"enabled": false,
+			"client" : "lmn-prd-graphiterelay001.prd.lastminute.com",
+    		"prefix" : "lmn.prd.application.sensudash.dashboard_dev.instance"
+		}
+	},
+	"app": {
+		"place_holder": 	"Some speial value"
+	}
+}
