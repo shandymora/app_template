@@ -13,7 +13,7 @@
 	"client": {
 		"statsd": {
 			"enabled": false,
-			"client" : "lmn-prd-graphiterelay001.prd.lastminute.com",
+			"server" : "lmn-prd-graphiterelay001.prd.lastminute.com",
     		"prefix" : "lmn.prd.application.sensudash.dashboard_dev.instance"
 		}
 	},

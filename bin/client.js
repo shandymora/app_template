@@ -18,7 +18,7 @@ function statsd(oSettings) {
 	this.client = {};
 	
 	this.start = function() {
-		self.client = new StatsD(oSettings.client);
+		self.client = new StatsD(oSettings.server);
 		
 		self.client.socket.on('error', function(error) {
 			if (logLevel.error == true) { log.error('Error from statsd_client', { error: error } ); }
@@ -33,7 +33,7 @@ function statsd(oSettings) {
 	
 	this.get_config = function() {
 		return ({
-			server:	oSettings.client,
+			server:	oSettings.server,
 			prefix: self.statsd_prefix
 		});
 	};
