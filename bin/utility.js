@@ -52,6 +52,35 @@ function timeInSecs (sDateString) {
     return now;
 }
 
+function Timer() {
+	
+	this.start_time = {};
+	this.stop_time = {};
+	this.elasped_time = {};
+	
+	this.start = function() {
+		self.start_time = process.hrtime();
+		return;
+	};
+	
+	this.stop = function() {
+		self.elasped_time = process.hrtime(self.start_time);
+		return;
+	};
+	
+	this.elasped_in_ms = function() {
+		return self.elasped_time[1] / 1000000;
+	};
+	this.elasped_in_s = function() {
+		return self.elasped_time[0];
+	};
+	this.elasped_in_ns = function() {
+		return self.elasped_time[1];
+	};
+	var self = this;
+	self.start();
+}
+
 // start statsd client
 var statsd = {};
 

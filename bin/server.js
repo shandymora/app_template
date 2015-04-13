@@ -1,6 +1,7 @@
 // Include modules
 var http 		= require('http');
 var url 		= require('url');
+var net			= require('net');
 var $			= require('jquery');
 var config		= require('./config');
 var router		= require('./router');
@@ -15,13 +16,13 @@ var log = config.log;
 var currentDir = config.currentDir;
 
 // HTTP
-function http_server(settings) {
+function http_server(port) {
 
 	var http_app_server = {};
 	
 	this.start = function() {
-		http_app_server = http.createServer(onRequest).listen(settings.port);
-		if (logLevel.info == true) { log.info('HTTP Server has started'); }
+		http_app_server = http.createServer(onRequest).listen(port);
+		if (logLevel.info == true) { log.info('HTTP Server has started on port '+port); }
 	};
 	
 	this.stop = function(callback) {
@@ -32,7 +33,7 @@ function http_server(settings) {
 	};
 
 	function onRequest(request, response) {
-		utility.statsd.client.increment(utility.statsd.prefix+'app.server.http_server.request_count');
+		utility.statsd.client.increment(utility.statsd.prefix+'app.server.http_server.request');
     	var pathname = url.parse(request.url).pathname;
     	router.route(pathname, response, request);
   	}
@@ -138,6 +139,52 @@ function smtp_server(settings, done) {
 	
 }
 
+//TCP
+function tcp_server(port, callback) {
+	var tcp_server = {};
+	
+	this.start = function() {
+		tcp_server = net.createServer().listen(port);
+		if (logLevel.info == true) { log.info('TCP Server has started on port '+port); }
+		
+		tcp_server.on('connection', function(socket) {
+			if (logLevel.info == true) { log.info('Connection from client:'+socket.remoteAddress+':'+socket.remotePort); }
+			utility.statsd.client.increment(utility.statsd.prefix+'app.server.tcp_server.connection');
+			socket.on('data', function(data) {
+				 if ( callback ) { callbacks.parse_data(data); }
+			});
+			
+			socket.on('end', function() { 
+				if (logLevel.info == true) { log.info('Client disconnected from TCP server, port:'+port); }
+				socket.end();
+			});
+		});
+		
+		tcp_server.on('close', function() { 
+			if (logLevel.info == true) { log.info('Server on port '+port+' closed'); }
+		});
+		
+		tcp_server.on('error', function(err) { 
+			if (logLevel.info == true) { log.info('Error occurred', {error:err}); }
+		});
+		
+	};
+	
+	this.stop = function() {
+		
+	};
+	
+	this.write = function() {
+		
+	};
+	
+		 
+	
+	var self = this;
+	self.start();
+}
+
 // Export variables/functions
 exports.http_server = http_server;
 exports.smtp_server = smtp_server;
+exports.tcp_server = tcp_server;

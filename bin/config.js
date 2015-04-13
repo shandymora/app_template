@@ -18,6 +18,9 @@ var health = {
 	}
 };
 
+var app_data = {};
+exports.app_data = app_data;
+
 // Define logging settings
 var logLevel = {
 	debug:	false,

@@ -10,13 +10,33 @@ var logLevel = config.logLevel;
 var log = config.log;
 var currentDir = config.currentDir;
 
+config.app_data = {
+	tcp_servers:			{},
+	http_servers:			{}
+};
+
 function start(oSettings) {
 	
 	// initialize statsd client
 	utility.statsd = new client.statsd(oSettings.client.statsd);
 	
-	// start http server
-	server.http_server(oSettings.server.http);
+	// start http servers
+	if ( utility.isArray(oSettings.server.http.port) ) {
+		oSettings.server.http.port.forEach( function(port) {
+			config.app_data.http_servers[port.toString()] = new server.http_server(port);
+		});
+	} else {
+		config.app_data.http_servers[oSettings.server.http.port.toString()] = new server.http_server(oSettings.server.http.port);
+	}
+	
+	// start tcp servers
+	if ( utility.isArray(oSettings.server.tcp.port) ) {
+		oSettings.server.tcp.port.forEach( function(port) {
+			config.app_data.tcp_servers[port.toString()] = new server.tcp_server(port, {parse_data:parse_data});
+		});
+	} else {
+		config.app_data.tcp_servers[oSettings.server.tcp.port.toString()] = new server.tcp_server(oSettings.server.tcp.port, {parse_data:parse_data});
+	}
 
 			
 }
