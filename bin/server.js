@@ -156,8 +156,13 @@ function tcp_server(port, callback) {
 			
 			socket.on('end', function() { 
 				if (logLevel.info == true) { log.info('Client disconnected from TCP server, port:'+port); }
+			});
+			
+			socket.on('error', function(err) {
+				if (logLevel.error == true) { log.error('Socket error from client'); }
 				socket.end();
 			});
+			
 		});
 		
 		tcp_server.on('close', function() { 
