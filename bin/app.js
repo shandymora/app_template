@@ -20,6 +20,9 @@ function start(oSettings) {
 	// initialize statsd client
 	utility.statsd = new client.statsd(oSettings.client.statsd);
 	
+	// Setup timer to send health stats every 60s
+	send_health_stats();
+	
 	// start http servers
 	if ( utility.isArray(oSettings.server.http.port) ) {
 		oSettings.server.http.port.forEach( function(port) {
@@ -184,6 +187,35 @@ function exceptionHandler() {
 	    // handle and log the error safely
 	    console.log('BIG ASS UNHANDLED EXCEPTION: '+JSON.stringify(err,undefined,2));
 	});
+}
+
+function send_health_stats() {
+	// Periodically send health status to StatsD, hard coded to 60s
+	var last = {
+		num_full_gc:	0,
+		num_inc_gc:		0
+	};
+	
+	var healthTimer = setInterval( function() {
+		console.log('Sending health to StatsD');
+		
+		// Calculate change in counters over interval period.  Hardcoded to 60secs currently.
+		var count_full_gc = config.health.memory.heap.num_full_gc - last.num_full_gc;
+		var count_inc_gc = config.health.memory.heap.num_inc_gc - last.num_inc_gc;
+		
+		utility.statsd.client.gauge(utility.statsd.prefix+'.health.memory.heap.current_base', config.health.memory.heap.current_base);
+		utility.statsd.client.gauge(utility.statsd.prefix+'.health.memory.heap.estimated_base', config.health.memory.heap.estimated_base);
+		utility.statsd.client.gauge(utility.statsd.prefix+'.health.memory.heap.usage_trend', config.health.memory.heap.usage_trend);
+		utility.statsd.client.gauge(utility.statsd.prefix+'.health.memory.heap.full_gc_count', config.health.memory.heap.num_full_gc);
+		utility.statsd.client.gauge(utility.statsd.prefix+'.health.memory.heap.inc_gc_count', config.health.memory.heap.num_inc_gc);
+		
+		utility.statsd.client.increment(utility.statsd.prefix+'.health.memory.heap.full_gc', count_full_gc);
+		utility.statsd.client.increment(utility.statsd.prefix+'.health.memory.heap.inc_gc', count_inc_gc);
+		
+		last.num_full_gc = config.health.memory.heap.num_full_gc;
+		last.num_inc_gc = config.health.memory.heap.num_inc_gc;
+		
+	}, 60000);
 }
 
 // Module exports
