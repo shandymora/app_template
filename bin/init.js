@@ -1,5 +1,10 @@
-// Include modules
+/*
+ * project:	app_template
+ * author: 	amora
+ * 
+ */
 
+// Include modules
 var config		= require('./config');
 var memwatch 	= require('memwatch');
 var app			= require('./app');

@@ -1,3 +1,9 @@
+/*
+ * project:	app_template
+ * author: 	amora
+ * 
+ */
+
 // Include modules
 var url 		= require('url');
 var handlers 	= require('./handlers');

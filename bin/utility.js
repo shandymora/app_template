@@ -1,3 +1,9 @@
+/*
+ * project:	app_template
+ * author: 	amora
+ * 
+ */
+
 function matchRegexp( o, regexp, done) {
   if ( !( regexp.test( o ) ) ) {
         done (false, null);
