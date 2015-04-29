@@ -1,3 +1,9 @@
+/*
+ * project:	app_template
+ * author: 	amora
+ * 
+ */
+
 // Include modules
 var config		= require('./config');
 var net			= require('net');
@@ -6,6 +12,7 @@ var $			= require('jquery');
 var StatsD		= require('node-statsd').StatsD;
 var irc 		= require("irc");
 var utility		= require('./utility');
+var redis		= require('redis');
 
 // Logging parameters
 var logLevel = config.logLevel;
@@ -242,8 +249,58 @@ function httpConn (options, done) {
 	}
 }
 
+function redisConn (oSettings, ready_callback) {
+	
+
+	var oOptions = {
+		server:		'localhost',
+		port:		6379,
+		db:			0
+	};
+	
+	$.extend(true, oOptions, oSettings);
+	
+	var connect_options = {
+		retry_max_delay:	10000
+	};
+	
+	this.connected 	= false;
+	this.error		= false;
+	
+	this.client = redis.createClient(oOptions.port, oOptions.server, connect_options);
+	
+	this.client.select(oOptions.db, function() {});
+	
+	var self = this;
+	
+	this.client.on("error", function (err) {
+		if (logLevel.error == true) { log.error('Redis Error: '+err, {error: err}); }
+		self.connected = false;
+		self.error = true;
+		console.log('Redis Error: '+err);
+  	});
+  	
+	this.client.on('ready', function() {
+		if (logLevel.info == true) { log.info('Connected to Redis server: '+oSettings.server); }
+		self.connected = true;
+		if ( ready_callback ) { ready_callback(); }
+	});
+	
+	this.client.on('drain', function() {
+		console.log('Drain detected.');
+	});
+	
+	this.client.on('end', function() {
+		if (logLevel.warn == true) { log.warn('Connection to Redis server ended'); }
+		console.log('Connection ended');
+		self.connected = false;
+	});
+	
+}
+
 exports.tcpConn = tcpConn;
 exports.httpConn = httpConn;
 exports.statsd = statsd;
 exports.elasticsearch = elasticsearch;
 exports.ircBot = ircBot;
+exports.redisConn = redisConn;
