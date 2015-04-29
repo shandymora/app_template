@@ -1,3 +1,9 @@
+/*
+ * project:	app_template
+ * author: 	amora
+ * 
+ */
+
 // Include modules
 var http 		= require('http');
 var url 		= require('url');
@@ -161,6 +167,7 @@ function tcp_server(port, callback) {
 			socket.on('error', function(err) {
 				if (logLevel.error == true) { log.error('Socket error from client'); }
 				socket.end();
+				// Test whether to do socket.destroy() instead.
 			});
 			
 		});
@@ -189,7 +196,33 @@ function tcp_server(port, callback) {
 	self.start();
 }
 
+function start_tcp_servers(oSettings, callback) {
+	if ( 'tcp' in oSettings.server ) {
+		if ( utility.isArray(oSettings.server.tcp.port) ) {
+			oSettings.server.tcp.port.forEach( function(port) {
+				config.app_data.tcp_servers[port.toString()] = new tcp_server(port, callback);
+			});
+		} else {
+			config.app_data.tcp_servers[oSettings.server.tcp.port.toString()] = new tcp_server(oSettings.server.tcp.port, callback);
+		}
+	}
+}
+
+function start_http_servers(oSettings, callback) {
+	if ( 'http' in oSettings.server ) {
+		if ( utility.isArray(oSettings.server.http.port) ) {
+			oSettings.server.http.port.forEach( function(port) {
+				config.app_data.http_servers[port.toString()] = new http_server(port);
+			});
+		} else {
+			config.app_data.http_servers[oSettings.server.http.port.toString()] = new http_server(oSettings.server.http.port);
+		}
+	}
+}
+
 // Export variables/functions
 exports.http_server = http_server;
 exports.smtp_server = smtp_server;
 exports.tcp_server = tcp_server;
+exports.start_tcp_servers = start_tcp_servers;
+exports.start_http_servers = start_http_servers;
