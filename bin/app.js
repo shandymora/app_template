@@ -1,3 +1,9 @@
+/*
+ * project:	app_template
+ * author: 	amora
+ * 
+ */
+
 // Include modules
 var config		= require('./config');
 var $			= require('jquery');
@@ -12,10 +18,15 @@ var currentDir = config.currentDir;
 
 config.app_data = {
 	tcp_servers:			{},
-	http_servers:			{}
+	http_servers:			{},
+	redis_clients:			{},
+	ircBots:				{}
 };
 
 function start(oSettings) {
+	
+	// Setup app cluster
+	clusterApp(oSettings.app.cluster);
 	
 	// initialize statsd client
 	utility.statsd = new client.statsd(oSettings.client.statsd);
@@ -24,24 +35,11 @@ function start(oSettings) {
 	send_health_stats();
 	
 	// start http servers
-	if ( utility.isArray(oSettings.server.http.port) ) {
-		oSettings.server.http.port.forEach( function(port) {
-			config.app_data.http_servers[port.toString()] = new server.http_server(port);
-		});
-	} else {
-		config.app_data.http_servers[oSettings.server.http.port.toString()] = new server.http_server(oSettings.server.http.port);
-	}
+	server.start_http_servers(oSettings);
 	
 	// start tcp servers
-	if ( utility.isArray(oSettings.server.tcp.port) ) {
-		oSettings.server.tcp.port.forEach( function(port) {
-			config.app_data.tcp_servers[port.toString()] = new server.tcp_server(port, {parse_data:parse_data});
-		});
-	} else {
-		config.app_data.tcp_servers[oSettings.server.tcp.port.toString()] = new server.tcp_server(oSettings.server.tcp.port, {parse_data:parse_data});
-	}
+	server.start_tcp_servers(oSettings, parse_data);
 
-			
 }
 
 function isMaster(node, done) {
@@ -97,7 +95,7 @@ function clusterApp(oSettings) {
 	// Are any nodes already up, what are their state?
 	var node_index = 0;
 	var found_master = false;
-	config.settings.app.nodes.forEach( function(node) {
+	oSettings.nodes.forEach( function(node) {
 		if ( node != config.my_hostname   ) { 
 			// Get node status
 			isMaster(node, function(masterFound, checked_node) {
@@ -106,9 +104,12 @@ function clusterApp(oSettings) {
 					if ( checked_node != config.health.cluster.master ) {
 						// New master found
 						if (logLevel.debug == true) { log.debug('New master: '+checked_node); }
-						for (var bot in config.settings.client.ircBot) {
-							app_clients[bot].sendMessage('New master: '+checked_node);
+						if ( 'ircBot' in config.settings.client ) {
+							for (var bot in config.settings.client.ircBot) {
+								config.app_data.ircBots[bot].sendMessage('New master: '+checked_node);
+							}
 						}
+							
 					}
 					
 					config.health.cluster.master = checked_node;
@@ -123,13 +124,15 @@ function clusterApp(oSettings) {
 				} 
 				node_index += 1;
 				
-				if ( node_index == config.settings.app.nodes.length ) {
+				if ( node_index == oSettings.nodes.length ) {
 					if ( ! found_master ) {
 						// I will be master as I didn't find any
 						config.health.cluster.master = config.my_hostname;
 						config.health.cluster.is_master = true;
-						for (var bot in config.settings.client.ircBot) {
-							app_clients[bot].sendMessage('I am master');
+						if ( 'ircBot' in config.settings.client ) {
+							for (var bot in config.settings.client.ircBot) {
+								config.app_data.ircBots[bot][bot].sendMessage('I am master');
+							}
 						}
 					}
 				}
@@ -145,7 +148,7 @@ function clusterApp(oSettings) {
 	setInterval( function() {
 		node_index = 0;
 		found_master = false;
-		config.settings.app.nodes.forEach( function(node) {
+		oSettings.nodes.forEach( function(node) {
 			if ( node != config.my_hostname   ) { 
 				// Get node status
 				isMaster(node, function(masterFound, checked_node) {
@@ -154,8 +157,10 @@ function clusterApp(oSettings) {
 						if ( checked_node != config.health.cluster.master ) {
 							// New master found
 							if (logLevel.debug == true) { log.debug('New master: '+checked_node); }
-							for (var bot in config.settings.client.ircBot) {
-								app_clients[bot].sendMessage('New master: '+checked_node);
+							if ( 'ircBot' in config.settings.client ) {
+								for (var bot in config.settings.client.ircBot) {
+									app_clients[bot].sendMessage('New master: '+checked_node);
+								}
 							}
 						}
 					
@@ -166,7 +171,7 @@ function clusterApp(oSettings) {
 					}
 					node_index += 1;
 					
-					if ( node_index == config.settings.app.nodes.length ) {
+					if ( node_index == oSettings.nodes.length ) {
 						if ( ! found_master ) {
 							// I will be master as I didn't find any
 							config.health.cluster.master = config.my_hostname;
