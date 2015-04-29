@@ -1,7 +1,14 @@
+/*
+ * project:	app_template
+ * author: 	amora
+ * 
+ */
+
 // Include modules
 var	fs 				= require("fs");
 var $				= require("jquery");
 var url				= require("url");
+var querystring		= require("querystring");
 var mime			= require("mime");
 var config			= require("./config");
 var client			= require("./client");
