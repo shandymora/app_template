@@ -1,3 +1,10 @@
+/*
+ * project:	app_template
+ * author: 	amora
+ * 
+ */
+
+// Include modules
 var fs 		= require('fs');
 var log 	= require('winston');
 var $		= require('jquery');
