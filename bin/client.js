@@ -15,12 +15,10 @@ var utility		= require('./utility');
 var redis		= require('redis');
 
 // Logging parameters
-var logLevel = config.logLevel;
-var log = config.log;
+var logger = config.app_data.logger;
 var currentDir = config.currentDir;
 
 // StatsD 
-
 function statsd(oSettings) {
 	this.client = {};
 	
@@ -28,10 +26,8 @@ function statsd(oSettings) {
 		self.client = new StatsD(oSettings.server);
 		
 		self.client.socket.on('error', function(error) {
-			if (logLevel.error == true) { log.error('Error from statsd_client', { error: error } ); }
+			if (logger.logLevel.error == true) { logger.log.error('Error from statsd_client', { error: error } ); }
 		});
-
-
 	};
 	
 	this.stop = function() {
@@ -76,23 +72,23 @@ function elasticsearch(options) {
 		    data: 	self.conn_options.sPayload, 				// or JSON.stringify ({name: 'jonas'}),
 		    success: function(data, status, xhr) {
 		    	var responseStatus = xhr.statusCode();
-				if (logLevel.debug == true) { log.debug('xhr.statusCode: '+JSON.stringify(responseStatus.status,undefined,2)); }
+				if (logger.logLevel.debug == true) { logger.log.debug('xhr.statusCode: '+JSON.stringify(responseStatus.status,undefined,2)); }
 				
 				var responseHeader = xhr.getResponseHeader("Content-Type");		
-				if (logLevel.debug == true) { log.debug('xhr.Content-Type: '+JSON.stringify(responseHeader,undefined,2)); }
+				if (logger.logLevel.debug == true) { logger.log.debug('xhr.Content-Type: '+JSON.stringify(responseHeader,undefined,2)); }
 		 
-		 		if (logLevel.info == true) { log.info('Successfully indexed message', {data:data}); }
+		 		if (logger.logLevel.info == true) { logger.log.info('Successfully indexed message', {data:data}); }
 		 		
 		    	done(false, responseStatus.status, data);
 		    },
 		    error: function(xhr, status, err) {
-		    	if (logLevel.warn == true) { log.warn('Unable to post message', { error: err } ); }
+		    	if (logger.logLevel.warn == true) { logger.log.warn('Unable to post message', { error: err } ); }
 		    	
 		    	var responseStatus = xhr.statusCode();
-				if (logLevel.error == true) { log.error('ERROR - xhr.statusCode: '+JSON.stringify(responseStatus.status,undefined,2)); }
+				if (logger.logLevel.error == true) { logger.log.error('ERROR - xhr.statusCode: '+JSON.stringify(responseStatus.status,undefined,2)); }
 				
 				var responseHeader = xhr.getResponseHeader("Content-Type");		
-				if (logLevel.error == true) { log.error('ERROR: xhr.Content-Type: '+JSON.stringify(responseHeader,undefined,2)); }
+				if (logger.logLevel.error == true) { logger.log.error('ERROR: xhr.Content-Type: '+JSON.stringify(responseHeader,undefined,2)); }
 		    	done(true, responseStatus.status, err);
 		    },
 		    contentType: "application/json",
@@ -105,7 +101,7 @@ function elasticsearch(options) {
 	};
 	
 	var self = this;
-	if (logLevel.info == true) { log.info('Created Elasticsearch client', { url: this.conn_options.oSettings.url } ); }
+	if (logger.logLevel.info == true) { logger.log.info('Created Elasticsearch client', { url: this.conn_options.oSettings.url } ); }
 	
 }
 
@@ -122,9 +118,9 @@ function ircBot(oSettings) {
 		
 		// Listen for bot errors
 		self.bot.addListener("error", function(message) {
-			if (logLevel.error == true) { log.error('IRC BOT error: ', message); }
+			if (logger.logLevel.error == true) { logger.log.error('IRC BOT error: ', message); }
 		});
-		if (logLevel.info == true) { log.info(oSettings.botName+' joined channel '+oSettings.channels.join(", ")); }
+		if (logger.logLevel.info == true) { logger.log.info(oSettings.botName+' joined channel '+oSettings.channels.join(", ")); }
 	};
 	
 	this.sendMessage = function(message) {
@@ -164,25 +160,25 @@ function tcpConn (oSettings) {
 		
 		conn.on('connect', function(socket) { 
 			retryCount = 0; 
-			if (logLevel.info == true) { log.info('connected to '+oSettings.host+' on port '+oSettings.port); }
+			if (logger.logLevel.info == true) { logger.log.info('connected to '+oSettings.host+' on port '+oSettings.port); }
 			server = oSettings.host;
 			self.connected = true;
 		});
 		
 		conn.on('error', function(err) { 
-			if (logLevel.info == true) { log.info('Error in connecting to '+oSettings.host+' on port '+oSettings.port, {error: err}); }
+			if (logger.logLevel.info == true) { logger.log.info('Error in connecting to '+oSettings.host+' on port '+oSettings.port, {error: err}); }
 			self.connected = false;
 			self.error = true;
 		});
 		conn.on('close', function() { 
-			if (logLevel.info == true) { log.info('connection to '+oSettings.host+' on port '+oSettings.port+' closed'); }
+			if (logger.logLevel.info == true) { logger.log.info('connection to '+oSettings.host+' on port '+oSettings.port+' closed'); }
 			self.connected = false;
 			reconnect(); 
 		});
 		
 		function reconnect() {
 			if (retryCount >= maxRetries) { 
-				if (logLevel.info == true) { log.info('Max retries to '+oSettings.host+' on port '+oSettings.port+' have been exceeded, giving up.'); }
+				if (logger.logLevel.info == true) { logger.log.info('Max retries to '+oSettings.host+' on port '+oSettings.port+' have been exceeded, giving up.'); }
 				self.connected = false;
 				conn.end();
 			} else {
@@ -223,22 +219,22 @@ function httpConn (options, done) {
 		    success: function(data, status, xhr) { 
 	
 				var responseStatus = xhr.statusCode();
-				if (logLevel.debug == true) { log.debug('xhr.statusCode: '+JSON.stringify(responseStatus.status,undefined,2)); }
+				if (logger.logLevel.debug == true) { logger.log.debug('xhr.statusCode: '+JSON.stringify(responseStatus.status,undefined,2)); }
 				
 				var responseHeader = xhr.getResponseHeader("Content-Type");		
-				if (logLevel.debug == true) { log.debug('xhr.Content-Type: '+JSON.stringify(responseHeader,undefined,2)); }
+				if (logger.logLevel.debug == true) { logger.log.debug('xhr.Content-Type: '+JSON.stringify(responseHeader,undefined,2)); }
 		 
 		    	done(false, responseStatus.status, data);
 	
 		    },
 		    error: function(xhr, status, err) {
-		    	if (logLevel.warn == true) { log.warn('Unable to post message', { error: err } ); }
+		    	if (logger.logLevel.warn == true) { logger.log.warn('Unable to post HTTP message to: '+conn_options.oSettings.url); }
 	    	
 		    	var responseStatus = xhr.statusCode();
-				if (logLevel.error == true) { log.error('ERROR - xhr.statusCode: '+JSON.stringify(responseStatus.status,undefined,2)); }
+	//			if (logger.logLevel.error == true) { logger.log.error('ERROR - xhr.statusCode: '+JSON.stringify(responseStatus.status,undefined,2)); }
 				
 				var responseHeader = xhr.getResponseHeader("Content-Type");		
-				if (logLevel.error == true) { log.error('ERROR: xhr.Content-Type: '+JSON.stringify(responseHeader,undefined,2)); }
+	//			if (logger.logLevel.error == true) { logger.log.error('ERROR: xhr.Content-Type: '+JSON.stringify(responseHeader,undefined,2)); }
 		    	done(true, responseStatus.status, err);
 		    },
 		    contentType: "application/json",
@@ -271,31 +267,84 @@ function redisConn (oSettings, ready_callback) {
 	
 	this.client.select(oOptions.db, function() {});
 	
-	var self = this;
 	
 	this.client.on("error", function (err) {
-		if (logLevel.error == true) { log.error('Redis Error: '+err, {error: err}); }
+		if (logger.logLevel.error == true) { logger.log.error('Redis Error on server: '+oSettings.server); }
 		self.connected = false;
 		self.error = true;
 		console.log('Redis Error: '+err);
   	});
   	
 	this.client.on('ready', function() {
-		if (logLevel.info == true) { log.info('Connected to Redis server: '+oSettings.server); }
+		if (logger.logLevel.info == true) { logger.log.info('Connected to Redis server: '+oSettings.server); }
 		self.connected = true;
-		if ( ready_callback ) { ready_callback(); }
+		self.setOptions(function() {
+			if ( ready_callback ) { ready_callback(); }
+		});
 	});
 	
 	this.client.on('drain', function() {
-		console.log('Drain detected.');
+		if (logger.logLevel.info == true) { logger.log.info('Drain detected on Redis server: '+oSettings.server); }
 	});
 	
 	this.client.on('end', function() {
-		if (logLevel.warn == true) { log.warn('Connection to Redis server ended'); }
-		console.log('Connection ended');
+		if (logger.logLevel.warn == true) { logger.log.warn('Connection to Redis server ended'); }
 		self.connected = false;
 	});
 	
+	this.setOptions = function(done) {
+		if ( config.health.cluster.is_master ) {
+			if (logger.logLevel.info == true) { logger.log.info('Checking and setting Redis DB options on server: '+oOptions.server); }
+			
+			if ( 'config' in oOptions ) {
+				config_count = 0;
+				oOptions.config.forEach( function(option) {
+					send_set_command('CONFIG', ['SET', option.parameter, option.value], function(err, reply) {
+						if (err) {
+							if (logger.logLevel.error == true) { logger.log.error('Cannot set option', {error:err}); }
+						}
+						config_count += 1;	
+						if ( config_count == oOptions.config.length ) {
+							// Processed all config options
+							send_set_command('CONFIG', ['SET', 'save', ''], function(err, reply) {
+								if (done) { done(); }
+							});
+						}
+					});
+				});
+			}
+			
+		} else {
+			// I am not master, don't do anything.
+			if (done) { done(); }
+		}
+	};
+	
+	function send_set_command(command, params, done) {
+		self.client.send_command(command, params, function(err, reply) {
+			if (logger.logLevel.info == true) { logger.log.info(oOptions.server+' SET '+command+' '+params+': '+reply); }
+			done(err, reply);
+		});	
+	}
+	
+	var self = this;
+}
+
+function start_redis_clients(oSettings, callback) {
+	if ( 'redis' in oSettings.client ) {
+		var name_count = 1;
+		for (var name in oSettings.client.redis) {
+			
+			config.app_data.redis_clients[name] = new redisConn(oSettings.client.redis[name], function() {
+				if ( name_count == Object.keys(oSettings.client.redis).length ) {
+					if (logger.logLevel.info == true) { logger.log.info('Finished connecting to all Redis servers.'); }
+					if ( callback ) { callback(); }
+				}
+				name_count += 1;
+			});
+		}
+		
+	}
 }
 
 exports.tcpConn = tcpConn;
@@ -304,3 +353,4 @@ exports.statsd = statsd;
 exports.elasticsearch = elasticsearch;
 exports.ircBot = ircBot;
 exports.redisConn = redisConn;
+exports.start_redis_clients = start_redis_clients;

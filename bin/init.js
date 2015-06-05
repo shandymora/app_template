@@ -3,18 +3,30 @@
  * author: 	amora
  * 
  */
-
-// Include modules
-var config		= require('./config');
-var memwatch 	= require('memwatch');
-var app			= require('./app');
+require('look').start();
 require('longjohn');
 
-// Logging parameters
-var logLevel = config.logLevel;
-var log = config.log;
-var currentDir = config.currentDir;
+// Setup Logging
+var config		= require('./config');
+var utility		= require('./utility');
+config.app_data = {
+	logger:					{},
+	tcp_servers:			{},
+	http_servers:			{},
+	redis_clients:			{},
+	ircBots:				{}
+};
 
+var currentDir = config.currentDir;
+config.app_data.logger = new utility.Logger({
+	file_path	: currentDir+'/../log/'+config.my_hostname,
+	log_for 	: 'app'
+});
+var logger = config.app_data.logger;
+
+// Include modules
+var memwatch 	= require('memwatch');
+var app			= require('./app');
 
 // Define command line options to script
 var opt = require('node-getopt').create([
@@ -26,21 +38,19 @@ var opt = require('node-getopt').create([
 .bindHelp()
 .parseSystem();
 
-
-
 if ( opt.options.loglevel ) { 
 	console.log(JSON.stringify(opt.options, undefined, 2));
 	
 	if ( opt.options.loglevel == "warn" ) {
-		config.logLevel.info = false;
-		log.warn('Log level warn'); 
+		logger.logLevel.info = false;
+		logger.log.info('Log level warn'); 
 	} else if ( opt.options.loglevel == "error" ) {
-		config.logLevel.info = false;
-		config.logLevel.warn = false;
-		log.error('Log level error'); 
+		logger.logLevel.info = false;
+		logger.logLevel.warn = false;
+		logger.log.info('Log level error'); 
 	} else if ( opt.options.loglevel == "debug" ) {
-		config.logLevel.debug = true;
-		log.log('info', 'Log level debug'); 
+		logger.logLevel.debug = true;
+		logger.log.log('info', 'Log level debug'); 
 	}
 	 
 }
@@ -52,7 +62,7 @@ if ( opt.options.config ) {
 }
 
 // Read in config file
-config.readConfig(configFile, function (settings) {
+utility.readConfig(configFile, function (settings) {
 
 	// memory monitoring
 	
@@ -71,11 +81,13 @@ config.readConfig(configFile, function (settings) {
 	// Start app
 	app.start(settings);
 	
-	// Refresh config
-	setInterval( function() {
-		if (logLevel.info == true) { log.info('Refreshing config'); }
-		// Read in config file
-		config.readConfig(configFile);
-	}, 60000);
+	if ( settings.app.auto_reload_config == true ) {
+		// Refresh config
+		setInterval( function() {
+			if (logger.logLevel.info == true) { logger.log.info('Refreshing config'); }
+			// Read in config file
+			utility.readConfig(configFile);
+		}, 60000);
+	}
 	
 });

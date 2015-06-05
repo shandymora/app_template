@@ -18,6 +18,11 @@
 		}
 	},
 	"app": {
-		"place_holder": 	"Some speial value"
+		"place_holder": 		"Some speial value",
+		"auto_reload_config":	false,
+		"cluster": {
+			"heartbeat":		10000,
+			"nodes":			[ "localhost" ]
+		}
 	}
 }

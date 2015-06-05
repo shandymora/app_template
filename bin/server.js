@@ -17,9 +17,8 @@ var client		= require('./client');
 var utility		= require('./utility');
 
 // Logging parameters
-var logLevel = config.logLevel;
-var log = config.log;
 var currentDir = config.currentDir;
+var logger = config.app_data.logger;
 
 // HTTP
 function http_server(port) {
@@ -28,12 +27,12 @@ function http_server(port) {
 	
 	this.start = function() {
 		http_app_server = http.createServer(onRequest).listen(port);
-		if (logLevel.info == true) { log.info('HTTP Server has started on port '+port); }
+		if (logger.logLevel.info == true) { logger.log.info('HTTP Server has started on port '+port); }
 	};
 	
 	this.stop = function(callback) {
 		http_app_server.close( function() {
-			if (logLevel.info == true) { log.info('HTTP Server has stopped'); }
+			if (logger.logLevel.info == true) { logger.log.info('HTTP Server has stopped'); }
 			callback();
 		});
 	};
@@ -71,7 +70,7 @@ function smtp_server(settings, done) {
 		
 			function(err) {
 				if (err) {
-					if (logLevel.error == true) { log.error('SMTP Server has an error', {error:err}); }
+					if (logger.logLevel.error == true) { logger.log.error('SMTP Server has an error', {error:err}); }
 				}
 			}
 		);
@@ -110,7 +109,7 @@ function smtp_server(settings, done) {
 				
 				utility.statsd.client.increment(utility.statsd.prefix+'app.server.smtp_server.message_parsed_count');
 				
-				if (logLevel.info == true) { log.info('received mail', {message:parsedMessage}); }
+				if (logger.logLevel.info == true) { logger.log.info('received mail', {message:parsedMessage}); }
 				
 				// Send response back to client
 				callback(null, null);
@@ -125,16 +124,16 @@ function smtp_server(settings, done) {
 		});
 		
 		smtp_app_server.on('error', function(connection) {
-			if (logLevel.error == true) { log.error('SMTP Server has an error'); }
+			if (logger.logLevel.error == true) { logger.log.error('SMTP Server has an error'); }
 		});
 		
-		if (logLevel.info == true) { log.info('SMTP Server has started'); }
+		if (logger.logLevel.info == true) { logger.log.info('SMTP Server has started'); }
 	
 	};
 	
 	this.stop = function(callback) {
 		smtp_app_server.end( function() {
-			if (logLevel.info == true) { log.info('SMTP Server has stopped'); }
+			if (logger.logLevel.info == true) { logger.log.info('SMTP Server has stopped'); }
 			callback();
 		});
 	};
@@ -151,33 +150,32 @@ function tcp_server(port, callback) {
 	
 	this.start = function() {
 		tcp_server = net.createServer().listen(port);
-		if (logLevel.info == true) { log.info('TCP Server has started on port '+port); }
+		if (logger.logLevel.info == true) { logger.log.info('TCP Server has started on port '+port); }
 		
 		tcp_server.on('connection', function(socket) {
-			if (logLevel.info == true) { log.info('Connection from client:'+socket.remoteAddress+':'+socket.remotePort); }
+			if (logger.logLevel.info == true) { logger.log.info('Connection from client:'+socket.remoteAddress+':'+socket.remotePort); }
 			utility.statsd.client.increment(utility.statsd.prefix+'app.server.tcp_server.connection');
 			socket.on('data', function(data) {
-				 if ( callback ) { callbacks.parse_data(data); }
+				 if ( callback ) { callback(data); }
 			});
 			
 			socket.on('end', function() { 
-				if (logLevel.info == true) { log.info('Client disconnected from TCP server, port:'+port); }
+				if (logger.logLevel.info == true) { logger.log.info('Client disconnected from TCP server, port:'+port); }
 			});
 			
 			socket.on('error', function(err) {
-				if (logLevel.error == true) { log.error('Socket error from client'); }
-				socket.end();
-				// Test whether to do socket.destroy() instead.
+				if (logger.logLevel.error == true) { logger.log.error('Socket error from client'); }
+				socket.destroy();
 			});
 			
 		});
 		
 		tcp_server.on('close', function() { 
-			if (logLevel.info == true) { log.info('Server on port '+port+' closed'); }
+			if (logger.logLevel.info == true) { logger.log.info('Server on port '+port+' closed'); }
 		});
 		
 		tcp_server.on('error', function(err) { 
-			if (logLevel.info == true) { log.info('Error occurred', {error:err}); }
+			if (logger.logLevel.info == true) { logger.log.info('Error occurred', {error:err}); }
 		});
 		
 	};

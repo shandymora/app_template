@@ -15,9 +15,8 @@ var client			= require("./client");
 var utility			= require('./utility');
 
 // Logging parameters
-var logLevel = config.logLevel;
-var log = config.log;
 var currentDir = config.currentDir;
+var logger = config.app_data.logger;
 
 function appHealth(response, request) {
 
@@ -71,7 +70,7 @@ function appHealth(response, request) {
 			    try {
 					oPayload = $.parseJSON(requestData.toString());
 				} catch (error) {
-					if (logLevel.error == true) { log.error('RequestData Not JSON format'); }
+					if (logger.logLevel.error == true) { logger.log.error('RequestData Not JSON format'); }
 					response.writeHeader("Content-Type", "application/json");
 					response.writeHead(500);
 		    		response.end(JSON.stringify({status:"failure",message:"RequestData not JSON format",issued:utility.timeInSecs()}));
@@ -91,7 +90,7 @@ function appHealth(response, request) {
 							}, 
 							function(err, statusCode, response) {
 								if (err) {
-									if (logLevel.error == true) { log.error('isMaster error', {node: node, response: response, statuscode: statusCode}); }
+									if (logger.logLevel.error == true) { logger.log.error('isMaster error', {node: node, response: response, statuscode: statusCode}); }
 
 								}
 								
