@@ -33,6 +33,40 @@ function start(oSettings) {
 	// start tcp servers
 	server.start_tcp_servers(oSettings, parse_data);
 
+	// Connect to Redis
+	client.start_redis_clients(oSettings, function() {
+		// Start services, call functions reliant on redis client connections
+	});
+	
+	// start amqp clients
+	client.start_amqp_clients(oSettings.client.amqp, parseMessage, function() {
+		// Start services, call functions reliant on AMQP client connections
+		console.log("completed function start_amqp_clients");
+	});
+	
+	/*
+	 * 	Reload config
+	 */
+	if ( config.settings.app.auto_reload_config == true ) {
+		// Refresh config
+		setInterval( function() {
+			if (logger.logLevel.info == true) { logger.log.info('Refreshing config'); }
+			// Read in config file
+			utility.readConfig(config.configFile);
+			
+			// Re-configure app based on updated config
+			
+		}, 60000);
+	}
+	
+}
+
+function parseMessage(message) {
+	console.log('Consumer received message: '+message.content.toString());
+}
+
+function parse_data(data) {
+	console.log("received some data from a TCP server");
 }
 
 function isMaster(node, done) {
