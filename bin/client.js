@@ -13,6 +13,7 @@ var StatsD		= require('node-statsd').StatsD;
 var irc 		= require("irc");
 var utility		= require('./utility');
 var redis		= require('redis');
+var amqp 		= require('amqplib/callback_api');
 
 // Logging parameters
 var logger = config.app_data.logger;
@@ -347,6 +348,224 @@ function start_redis_clients(oSettings, callback) {
 	}
 }
 
+function amqpConn(settings) {
+	
+	// Determine queue name
+	var queue_name = '';
+	
+	if ( settings.consumer == true && 'queue' in settings ) {
+		if ( 'name' in settings.queue ) { queue_name = settings.queue.name; } 
+		else { queue_name = settings.exchange.name+'_'+config.my_hostname; }
+	}
+		
+	var consumer = {
+		ch:			{},
+		queue:  	queue_name,
+		timeout:	1000,
+		backoff:	1
+	};
+	
+	var publisher = {
+		ch:			{},
+		timeout:	1000,
+		backoff:	1
+	};
+	
+	this.connection = {};
+	
+	
+	this.publish = function(message) {
+		publisher.ch.publish(settings.exchange.name, '', new Buffer ( message ) );
+		return;
+	};
+	
+	// Methods
+	this.connect = function(done) {
+		amqp.connect('amqp://'+settings.amqpUser+':'+settings.amqpPassword+
+			'@'+settings.amqpHost+':'+settings.amqpPort+'/'+settings.amqpvHost+'?heartbeat=20', function(err, conn) {
+		
+			if ( err != null ) { 
+				if (logger.logLevel.error == true) { logger.log.error('ERROR: '+err); } 
+				console.log('ERROR: '+err);
+				process.exit(1); 
+			}
+			if (logger.logLevel.info == true) { logger.log.info('Connection to '+settings.amqpHost+' succeeded'); }
+		  
+			conn.on('error', function (err) {
+			  	if (logger.logLevel.error == true) { logger.log.error('amqp connection had an error: ', { error : err }); }
+			});
+			conn.on('close', function (err) {
+				if (logger.logLevel.warn == true) { logger.log.warn('amqp connection closed'); }
+			});
+			conn.on('end', function (err) {
+			  	if (logger.logLevel.warn == true) { logger.log.warn('amqp connection ended'); }
+			});
+			
+			self.connection = conn;
+			done(false);
+		});
+	}
+	
+	this.consumerConn = function(done) {
+	  if (logger.logLevel.info == true) { logger.log.info('Consumer Connection established'); }
+	  var ok = self.connection.createChannel(on_open);
+	  
+	  function on_open(err, ch) {
+	    if (err != null) { if (logger.logLevel.error == true) { logger.log.error('ERROR: creating channel'); process.exit(1); } }
+	    else {
+	    	
+		    if (logger.logLevel.info == true) { logger.log.info('Created Consumer channel'); }
+			consumer.ch = ch;
+			
+		    // Create the queue
+		    consumer.ch.assertQueue(consumer.queue, {durable:settings.queue.durable, autoDelete:settings.queue.autoDelete }, function(err, ok) {
+		    	if (err != null) { if (logger.logLevel.error == true) { logger.log.error('ERROR asserting queue'); process.exit(1); } }
+		        else {
+		
+			        if (logger.logLevel.info == true) { logger.log.info('Created Consumer queue: '+consumer.queue); }
+			        
+			        // Create/connect to the exchange
+			        consumer.ch.assertExchange(settings.exchange.name, settings.exchange.type, { durable:settings.exchange.durable, autoDelete:settings.exchange.autoDelete, confirm:settings.exchange.confirm }, function(err, ok) {
+			        	if (err != null) { if (logger.logLevel.error == true) { logger.log.error('ERROR: '+err); } process.exit(1); } 
+			      		if (logger.logLevel.info == true) { logger.log.info('Consumer - Created/Connected exchange: '+settings.exchange.name); }
+			        
+		      
+		      
+				        // Bind the queue to the exchange
+				       	consumer.ch.bindQueue(consumer.queue, settings.exchange.name, '', {}, function(err, ok) {
+				            if (err != null) { 
+				            	if (logger.logLevel.error == true) { 
+				            		logger.log.error('bindQueue ERROR: ');
+				            		process.exit(1); 
+				            	} 
+				            }
+				            else {
+				
+					            if (logger.logLevel.info == true) { logger.log.info(consumer.queue+' bound to exchange: '+settings.exchange.name); }
+					            // Listen for messages and process
+					            consumer.ch.consume(consumer.queue, function(msg) {
+					                if (msg !== null) {
+					             		if (logger.logLevel.info == true) { logger.log.info('Received message', { msg: msg }); }
+					                	consumer.ch.ack(msg);
+					                	
+					                	done(msg);
+					                  	
+					                }		// if err on ch.consume
+					            });			// ch.consume function call
+					         }				// else, if err on ch.bindQueue
+				    	});				// ch.bindQueue function all
+				    	
+				    });	
+				    	
+		        }	
+	      	});				// ch.assertQueue function call
+	    }					// else, if err on_open
+	    
+	    // Handle channel errors
+	    consumer.ch.on('error', function(err) {
+	    	if (logger.logLevel.error == true) { logger.log.error('Consumer channel had an error'); }
+	    });
+	    consumer.ch.on('close', function(err) {
+	    	if (logger.logLevel.warn == true) { logger.log.warn('Consumer channel closed'); }
+	    	
+	    	setTimeout( function() {
+	    		self.consumerConn(done);
+				consumer.backoff += 1;
+	    	}, consumer.timeout*consumer.backoff);
+	    	
+	    });
+	    consumer.ch.on('end', function(err) {
+	    	if (logger.logLevel.warn == true) { logger.log.warn('Consumer channel ended'); }
+	    });
+	    
+	    
+	  }						// on_open function
+	}
+	
+	this.publisherConn = function(done) {
+		  if (logger.logLevel.info == true) { logger.log.info('Publisher Connection established'); }
+		  var ok = self.connection.createChannel(on_open);
+		  
+		  // Channel created
+		  function on_open(err, ch) {
+		    if (err != null) { if (logger.logLevel.error == true) { logger.log.error('ERROR: '+err); } process.exit(1); }
+		    else {
+		      if (logger.logLevel.info == true) { logger.log.info('Created Publisher channel'); }
+			  publisher.ch = ch;
+			  
+		      // Create/connect to the exchange
+		      publisher.ch.assertExchange(settings.exchange.name, settings.exchange.type, { durable:settings.exchange.durable, autoDelete:settings.exchange.autoDelete, confirm:settings.exchange.confirm }, function(err, ok) {
+		        if (err != null) { if (logger.logLevel.error == true) { logger.log.error('ERROR: '+err); } process.exit(1); } 
+		      	if (logger.logLevel.info == true) { logger.log.info('Publisher - Created/Connected exchange: '+settings.exchange.name); }
+		      	if (done) { done(); }
+		      });
+		    }
+		    
+		    // Handle channel errors
+		    publisher.ch.on('error', function(err) {
+		    	if (logger.logLevel.error == true) { logger.log.error('Publisher channel had an error: ', { error : err } ); }
+		    });
+		    publisher.ch.on('close', function(err) {
+		    	if (logger.logLevel.warn == true) { logger.log.warn('Publisher channel closed'); }
+		    	setTimeout( function() {
+		    		if (done) { self.publisherConn(done); }
+		    		else { self.publisherConn(); }	
+					publisher.backoff += 1;
+		    	}, publisher.timeout*self.publisher.backoff);
+		    	
+		    });
+		    publisher.ch.on('end', function(err) {
+		    	if (logger.logLevel.warn == true) { logger.log.warn('Publisher channel ended'); }
+		    });
+		  }
+	}
+
+	var self = this;
+}
+
+function start_amqp_clients(oSettings, consumer_action, done) {
+	
+	var name_count = 0;
+	
+	for (var name in oSettings) {
+		amqp_setup(name);
+	}
+	
+	function amqp_setup(name) {
+		config.app_data.amqp_clients[name] = new amqpConn(oSettings[name]);
+		config.app_data.amqp_clients[name].connect( function(err) {
+			if (err) {
+				if (logger.logLevel.info == true) { logger.log.info(name+" - Connection failed"); }
+			} else {
+				if (logger.logLevel.info == true) { logger.log.info(name+" - Connection established"); }
+				
+				if ( oSettings[name].publisher) {
+					// Be a publisher
+					config.app_data.amqp_clients[name].publisherConn(function() {
+						if (logger.logLevel.info == true) { logger.log.info(name+" is a publisher"); }
+					});
+				}
+					
+				if ( oSettings[name].consumer) {
+					// Be a consumer
+					config.app_data.amqp_clients[name].consumerConn(function(message) {
+						if (consumer_action) { consumer_action(message); }
+					});
+				}
+				
+				name_count += 1;
+				
+				if ( name_count == Object.keys(oSettings).length ) {
+					if (logger.logLevel.info == true) { logger.log.info('Finished connecting all AMQP clients.'); }
+					if ( done ) { done(); }
+				}
+					
+			}
+			
+		});
+	}
+}
+
 exports.tcpConn = tcpConn;
 exports.httpConn = httpConn;
 exports.statsd = statsd;
@@ -354,3 +573,4 @@ exports.elasticsearch = elasticsearch;
 exports.ircBot = ircBot;
 exports.redisConn = redisConn;
 exports.start_redis_clients = start_redis_clients;
+exports.start_amqp_clients = start_amqp_clients;
