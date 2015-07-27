@@ -5,20 +5,79 @@
 		},
 		"tcp": {
 			"port": [ 2023 ]
-		},
-		"cluster": {
-			"heartbeat":		10000
 		}
 	},
 	"client": {
 		"statsd": {
-			"enabled": false,
-			"server" : "lmn-prd-graphiterelay001.prd.lastminute.com",
-    		"prefix" : "lmn.prd.application.sensudash.dashboard_dev.instance"
-		}
+			"enabled": true,
+			"server" : "graphite.example.com",
+    		"prefix" : "application.example_app.instance"
+		},
+		"amqp": {
+          "producer_example": {
+              "amqpHost":   "rabbitmq01.example.com",
+                "amqpUser":     "example_user",
+                "amqpPassword": "example_password",
+                "amqpPort" :    5672,
+                "amqpvHost" :   "sensu",
+                "exchange":     {
+                    "name":         "example_exchange",
+                    "type":         "direct",
+                    "durable":      false,
+                    "autoDelete":   false,
+                    "confirm":      true
+                },
+                "queue":    {
+                    "durable":      false,
+                    "autoDelete":   true
+                },
+                "publisher":    true,
+                "consumer":     false
+          },
+          "consumer_example": {
+              "amqpHost":   "rabbitmq02.example.com",
+                "amqpUser":     "example_user",
+                "amqpPassword": "example_password",
+                "amqpPort" :    5672,
+                "amqpvHost" :   "sensu",
+                "exchange":     {
+                    "name":         "example_exchange",
+                    "type":         "direct",
+                    "durable":      false,
+                    "autoDelete":   false,
+                    "confirm":      true
+                },
+                "queue":    {
+                    "name":         "consumer_test",
+                    "durable":      false,
+                    "autoDelete":   true
+                },
+                "publisher":    false,
+                "consumer":     true
+          },
+        "redis": {
+          "redis01": {
+                "server":   "redis01.example.com",
+                "port":     6379,
+                "db":       3, 
+                "slots":    [ "0-16383" ],
+                "slot_default": true,
+                "config": [
+                    {
+                        "parameter":    "zset-max-ziplist-entries",
+                        "value":        3000
+                    },
+                    {
+                        "parameter":    "zset-max-ziplist-value",
+                        "value":        256
+                    }
+                ]
+                    
+            }
+            
+        }
 	},
 	"app": {
-		"place_holder": 		"Some speial value",
 		"auto_reload_config":	false,
 		"cluster": {
 			"heartbeat":		10000,
