@@ -28,7 +28,7 @@ function readConfig(file, done) {
   	
     // If error
     if (err) { 
-      if (logLevel.error == true) { log.error('Error opening config file', { error: err } ); }
+      if (config.app_data.logger.logLevel.error == true) { config.app_data.logger.log.error('Error opening config file', { error: err } ); }
       console.log('error reading config file: '+JSON.stringify(err, undefined, 2));
       process.exit(1);
     }
@@ -37,7 +37,7 @@ function readConfig(file, done) {
     try {
 		var app_config = $.parseJSON(contents.toString());
 	} catch (error) {
-		if (logLevel.error == true) { log.error('Invald JSON configuration file'); }
+		if (config.app_data.logger.logLevel.error == true) { config.app_data.logger.log.error('Invald JSON configuration file'); }
 		console.log('error reading config file: '+JSON.stringify(error, undefined, 2));
 		process.exit(1);
 	}
