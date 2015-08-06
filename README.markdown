@@ -12,15 +12,15 @@ It will be quite obvious from a cursory glance at the code that I am in no way a
 * [Summary](#summary)
 * [Usage](#usage)
    * [Servers](#servers)
-      * [TCP](#tcp-server)
-      * [HTTP](#http-server)
+      * [TCP Server](#tcp-server)
+      * [HTTP Server](#http-server)
       * [SMTP](#smtp)
    * [clients](#clients)
       * [StatsD](#statsd)
       * [Elasticserach](#elasticsearch-client)
       * [IRC Bot](#ircbot)
-      * [TCP](#tcp-client)
-      * [HTTP](#http-client)
+      * [TCP Client](#tcp-client)
+      * [HTTP Client](#http-client)
       * [Redis](#redis-client)
       * [AMQP](#amqp-client)
 * [Required Modules](#required_modules)
@@ -29,9 +29,9 @@ It will be quite obvious from a cursory glance at the code that I am in no way a
 
 # Usage
 ## Servers
-### TCP
+### TCP Server
 
-### HTTP
+### HTTP Server
 
 ### SMTP
 
@@ -42,9 +42,9 @@ It will be quite obvious from a cursory glance at the code that I am in no way a
 
 ### IRC Bot
 
-### TCP
+### TCP Client
 
-### HTTP
+### HTTP Client
 
 ### Redis
 
