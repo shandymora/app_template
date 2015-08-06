@@ -28,5 +28,26 @@ It will be quite obvious from a cursory glance at the code that I am in no way a
 # Summary
 
 # Usage
+## Servers
+### TCP
+
+### HTTP
+
+### SMTP
+
+## Clients
+### StatsD
+
+### Elasticsearch
+
+### IRC Bot
+
+### TCP
+
+### HTTP
+
+### Redis
+
+### AMQP
 
 # Required Modules
