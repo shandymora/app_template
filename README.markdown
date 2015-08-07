@@ -50,4 +50,73 @@ It will be quite obvious from a cursory glance at the code that I am in no way a
 
 ### AMQP
 
+
+#### Publisher
+
+Config
+'''
+"client": {
+	"publisher": {
+		"amqpHost":   	"rabbitmq.example.com",
+        "amqpUser":     "shandy",
+        "amqpPassword": "secret",
+        "amqpPort" :    5672,
+        "amqpvHost" :   "app1",
+        "exchange":     {
+            "name":         "app_ex",
+            "type":         "direct",
+            "durable":      false,
+            "autoDelete":   false,
+            "confirm":      true
+        },
+        "publisher":    true,
+        "consumer":     false
+	}
+}
+'''
+
+#### Consumer
+
+Config
+'''
+"client": {
+	"consumer": {
+		"amqpHost":   	"rabbitmq.example.com",
+        "amqpUser":     "shandy",
+        "amqpPassword": "secret",
+        "amqpPort" :    5672,
+        "amqpvHost" :   "app1",
+        "exchange":     {
+            "name":         "app_ex",
+            "type":         "direct",
+            "durable":      false,
+            "autoDelete":   false,
+            "confirm":      true
+        },
+        "queue":    {
+            "name":         "consumer_test",
+            "durable":      false,
+            "autoDelete":   true
+        },
+        "publisher":    false,
+        "consumer":     true
+	}
+}
+'''
+
+Example code, app.js function start:
+
+'''
+client.start_amqp_clients(oSettings.client.amqp, parseMessage, function() {
+	// Start services, call functions reliant on AMQP client connections
+	console.log("completed function start_amqp_clients");
+});
+
+function parseMessage(message) {
+	console.log('Consumer received message: '+message.content.toString());
+}
+
+'''
+When calling start_amqp_clients, the second parameter is a function that should accept received messages.  In this example they a just printed to stdout.
+
 # Required Modules
