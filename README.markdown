@@ -75,13 +75,13 @@ Config
 	}
 }
 ```
-The configuration above specifies a connection named *publisher*, whiich connects to the RabbitMQ server *rabbitq.example.com* 
+The configuration above specifies a connection named *publisher*, which connects to the RabbitMQ server *rabbitmq.example.com* 
 on the port *5672* using credentials username *shandy* and password *secret*.  
 
 The Vhost *app1* should already exist.
 
 The exchange *app_ex* will be created if it doesn't already exist.  The exchange configuration specified should match an already 
-existing exchange.  Messages published using this connection will use the routing key *test*.
+existing exchange, otherwise the app will bail.  Messages published using this connection will use the routing key *test*.
 
 #### Consumer
 
@@ -103,6 +103,7 @@ Config
         },
         "queue":    {
             "name":         "consumer_test",
+            "routingKey":   "test",
             "durable":      false,
             "autoDelete":   true
         },
@@ -111,6 +112,19 @@ Config
 	}
 }
 ```
+The configuration above specifies a connection named *consumer*, which connects to the RabbitMQ server *rabbitmq.example.com* 
+on the port *5672* using credentials username *shandy* and password *secret*.
+
+The Vhost *app1* should already exist.
+
+The exchange *app_ex* will be created if it doesn't already exist.  The exchange configuration specified should match an already 
+existing exchange, if not the app will bail. 
+
+A queue named *consumer_test* will be created if one doesn't already exist and bound to the exchange *app_ex*, listening for 
+messages with the routing key *test*.  Should the queue already exist then the consumer will join other conusmers listening, 
+receiving messages when RabbitMQ routes them.
+
+
 
 Example code, app.js function start:
 
@@ -125,7 +139,7 @@ function parseMessage(message) {
 }
 
 ```
-When calling start_amqp_clients, the second parameter is a function that should accept received messages.  
+When calling start_amqp_clients, the second parameter *parseMessage* is a function that should accept received messages.  
 In this example they are just printed to stdout.
 
 # Required Modules
