@@ -375,8 +375,12 @@ function amqpConn(settings) {
 	
 	
 	this.publish = function(message) {
-		publisher.ch.publish(settings.exchange.name, '', new Buffer ( message ) );
-		return;
+		if ( 'publisher' in settings && 'routingKey' in settings.exchange ) {
+			if ( settings.publisher == true ) {
+				publisher.ch.publish(settings.exchange.name, settings.exchange.routingKey, new Buffer ( message ) );
+				return;
+			}
+		}
 	};
 	
 	// Methods
