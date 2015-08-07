@@ -54,7 +54,7 @@ It will be quite obvious from a cursory glance at the code that I am in no way a
 #### Publisher
 
 Config
-'''
+```
 "client": {
 	"publisher": {
 		"amqpHost":   	"rabbitmq.example.com",
@@ -73,7 +73,7 @@ Config
         "consumer":     false
 	}
 }
-'''
+```
 
 #### Consumer
 
@@ -117,6 +117,7 @@ function parseMessage(message) {
 }
 
 ```
-When calling start_amqp_clients, the second parameter is a function that should accept received messages.  In this example they a just printed to stdout.
+When calling start_amqp_clients, the second parameter is a function that should accept received messages.  
+In this example they are just printed to stdout.
 
 # Required Modules
