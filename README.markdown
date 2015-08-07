@@ -65,6 +65,7 @@ Config
         "exchange":     {
             "name":         "app_ex",
             "type":         "direct",
+            "routingKey":   "test",
             "durable":      false,
             "autoDelete":   false,
             "confirm":      true
@@ -74,6 +75,13 @@ Config
 	}
 }
 ```
+The configuration above specifies a connection named *publisher*, whiich connects to the RabbitMQ server *rabbitq.example.com* 
+on the port *5672* using credentials username *shandy* and password *secret*.  
+
+The Vhost *app1* should already exist.
+
+The exchange *app_ex* will be created if it doesn't already exist.  The exchange configuration specified should match an already 
+existing exchange.  Messages published using this connection will use the routing key *test*.
 
 #### Consumer
 
