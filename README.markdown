@@ -78,7 +78,7 @@ Config
 #### Consumer
 
 Config
-'''
+```
 "client": {
 	"consumer": {
 		"amqpHost":   	"rabbitmq.example.com",
@@ -102,11 +102,11 @@ Config
         "consumer":     true
 	}
 }
-'''
+```
 
 Example code, app.js function start:
 
-'''
+```
 client.start_amqp_clients(oSettings.client.amqp, parseMessage, function() {
 	// Start services, call functions reliant on AMQP client connections
 	console.log("completed function start_amqp_clients");
@@ -116,7 +116,7 @@ function parseMessage(message) {
 	console.log('Consumer received message: '+message.content.toString());
 }
 
-'''
+```
 When calling start_amqp_clients, the second parameter is a function that should accept received messages.  In this example they a just printed to stdout.
 
 # Required Modules
