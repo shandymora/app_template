@@ -23,6 +23,7 @@
                 "exchange":     {
                     "name":         "example_exchange",
                     "type":         "direct",
+                    "routingKey":   "test",
                     "durable":      false,
                     "autoDelete":   false,
                     "confirm":      true
@@ -49,6 +50,7 @@
                 },
                 "queue":    {
                     "name":         "consumer_test",
+                    "routingKey":   "test",
                     "durable":      false,
                     "autoDelete":   true
                 },
