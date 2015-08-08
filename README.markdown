@@ -21,8 +21,8 @@ It will be quite obvious from a cursory glance at the code that I am in no way a
       * [IRC Bot](#ircbot)
       * [TCP Client](#tcp-client)
       * [HTTP Client](#http-client)
-      * [Redis](#redis-client)
-      * [AMQP](#amqp-client)
+      * [Redis Client](#redis-client)
+      * [AMQP Client](#amqp-client)
 * [Required Modules](#required_modules)
 
 # Summary
@@ -46,9 +46,9 @@ It will be quite obvious from a cursory glance at the code that I am in no way a
 
 ### HTTP Client
 
-### Redis
+### Redis Client
 
-### AMQP
+### AMQP Client
 
 
 #### Publisher
