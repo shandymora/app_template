@@ -30,8 +30,8 @@ It will be quite obvious from a cursory glance at the code that I am in no way a
 # Usage
 ## Servers
 ### TCP Server
-Config
-======
+#### Config
+
 ```
 {
     "server": {
@@ -44,8 +44,7 @@ Config
 
 The key *port* is an array or port numbers your app should listen on.
 
-Example code, app.js function start:
-====================================
+#### Example code, app.js function start:
 ```
 server.start_tcp_servers(oSettings, parse_data);
 ```
@@ -54,8 +53,7 @@ When calling start_tcp_servers, the second parameter is a function that received
 
 ### HTTP Server
 
-Config
-======
+#### Config
 ```
 {
     "server": {
@@ -68,8 +66,7 @@ Config
 
 The key *port* is an array or port numbers your app should listen on.
 
-Example code, app.js function start:
-====================================
+#### Example code, app.js function start:
 ```
 server.start_http_servers(oSettings);
 ```
@@ -77,8 +74,7 @@ server.start_http_servers(oSettings);
 Once an HTTP server is listening, after calling *start_http_servers*, all connection requests are handled by *router.js*.  This
 module decides how to handle the HTTP request and will call the appropriate function from *handlers.js*
 
-router.js:
-==========
+#### Example code, router.js:
 Calls handler function based on request path:
 ```
 var handle = {
@@ -105,14 +101,50 @@ var handle = {
 
 ### Redis Client
 
+Uses the NPM module [node_redis](https://github.com/NodeRedis/node_redis) version 0.12.1
+
+#### Config
+```
+{
+    "client": {
+        "redis": {
+		  "redis01": {
+				"server":	"redis.example.com",
+				"port":		6379,
+				"db":		3,
+				"config": [
+					{
+						"parameter":	"zset-max-ziplist-entries",
+						"value":		3000
+					},
+					{
+						"parameter":	"zset-max-ziplist-value",
+						"value":		256
+					}
+				]
+					
+			}
+			
+		}
+	}
+}
+```
+
+Example code, app.js:
+```
+client.start_redis_clients(oSettings, function() {
+	console.log('Redis connections started');
+});
+```
+__ToDo: add publish/subscribe methods__
+
 ### AMQP Client
 
 Uses the NPM module [amqplib](http://squaremo.github.io/amqp.node/) version 0.2.0 
 
 #### Publisher
 
-Config
-======
+#### Config
 ```
 {
     "client": {
