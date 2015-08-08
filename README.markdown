@@ -50,10 +50,12 @@ It will be quite obvious from a cursory glance at the code that I am in no way a
 
 ### AMQP Client
 
+Uses the NPM module [amqplib](http://squaremo.github.io/amqp.node/) version 0.2.0 
 
 #### Publisher
 
 Config
+======
 ```
 "client": {
 	"publisher": {
@@ -86,6 +88,7 @@ existing exchange, otherwise the app will bail.  Messages published using this c
 #### Consumer
 
 Config
+======
 ```
 "client": {
 	"consumer": {
@@ -127,7 +130,7 @@ receiving messages when RabbitMQ routes them.
 
 
 Example code, app.js function start:
-
+====================================
 ```
 client.start_amqp_clients(oSettings.client.amqp, parseMessage, function() {
 	// Start services, call functions reliant on AMQP client connections
@@ -141,5 +144,9 @@ function parseMessage(message) {
 ```
 When calling start_amqp_clients, the second parameter *parseMessage* is a function that should accept received messages.  
 In this example they are just printed to stdout.
+
+__N.B. you could enable both publisher and consumer, but then you'd just consume any messages you published.  Not sure thats 
+useful.__
+
 
 # Required Modules
