@@ -30,8 +30,65 @@ It will be quite obvious from a cursory glance at the code that I am in no way a
 # Usage
 ## Servers
 ### TCP Server
+Config
+======
+```
+{
+    "server": {
+		"tcp": {
+			"port": [ 2003 ]
+		}
+	}
+}
+```
+
+The key *port* is an array or port numbers your app should listen on.
+
+Example code, app.js function start:
+====================================
+```
+server.start_tcp_servers(oSettings, parse_data);
+```
+
+When calling start_tcp_servers, the second parameter is a function that received data should be passed to.  
 
 ### HTTP Server
+
+Config
+======
+```
+{
+    "server": {
+		"http": {
+			"port": [ 2003 ]
+		}
+	}
+}
+```
+
+The key *port* is an array or port numbers your app should listen on.
+
+Example code, app.js function start:
+====================================
+```
+server.start_http_servers(oSettings);
+```
+
+Once an HTTP server is listening, after calling *start_http_servers*, all connection requests are handled by *router.js*.  This
+module decides how to handle the HTTP request and will call the appropriate function from *handlers.js*
+
+router.js:
+==========
+Calls handler function based on request path:
+```
+var handle = {
+	"/" : 				handlers.start,
+  	"/health":  		handlers.appHealth,
+  	"/list":			handlers.list,
+  	"/add": 	        handlers.add,
+  	"/delete":          handlers.delete
+};
+```
 
 ### SMTP
 
@@ -57,24 +114,26 @@ Uses the NPM module [amqplib](http://squaremo.github.io/amqp.node/) version 0.2.
 Config
 ======
 ```
-"client": {
-	"publisher": {
-		"amqpHost":   	"rabbitmq.example.com",
-        "amqpUser":     "shandy",
-        "amqpPassword": "secret",
-        "amqpPort" :    5672,
-        "amqpvHost" :   "app1",
-        "exchange":     {
-            "name":         "app_ex",
-            "type":         "direct",
-            "routingKey":   "test",
-            "durable":      false,
-            "autoDelete":   false,
-            "confirm":      true
-        },
-        "publisher":    true,
-        "consumer":     false
-	}
+{
+    "client": {
+    	"publisher": {
+    		"amqpHost":   	"rabbitmq.example.com",
+            "amqpUser":     "shandy",
+            "amqpPassword": "secret",
+            "amqpPort" :    5672,
+            "amqpvHost" :   "app1",
+            "exchange":     {
+                "name":         "app_ex",
+                "type":         "direct",
+                "routingKey":   "test",
+                "durable":      false,
+                "autoDelete":   false,
+                "confirm":      true
+            },
+            "publisher":    true,
+            "consumer":     false
+    	}
+    }
 }
 ```
 The configuration above specifies a connection named *publisher*, which connects to the RabbitMQ server *rabbitmq.example.com* 
@@ -90,29 +149,31 @@ existing exchange, otherwise the app will bail.  Messages published using this c
 Config
 ======
 ```
-"client": {
-	"consumer": {
-		"amqpHost":   	"rabbitmq.example.com",
-        "amqpUser":     "shandy",
-        "amqpPassword": "secret",
-        "amqpPort" :    5672,
-        "amqpvHost" :   "app1",
-        "exchange":     {
-            "name":         "app_ex",
-            "type":         "direct",
-            "durable":      false,
-            "autoDelete":   false,
-            "confirm":      true
-        },
-        "queue":    {
-            "name":         "consumer_test",
-            "routingKey":   "test",
-            "durable":      false,
-            "autoDelete":   true
-        },
-        "publisher":    false,
-        "consumer":     true
-	}
+{
+    "client": {
+    	"consumer": {
+    		"amqpHost":   	"rabbitmq.example.com",
+            "amqpUser":     "shandy",
+            "amqpPassword": "secret",
+            "amqpPort" :    5672,
+            "amqpvHost" :   "app1",
+            "exchange":     {
+                "name":         "app_ex",
+                "type":         "direct",
+                "durable":      false,
+                "autoDelete":   false,
+                "confirm":      true
+            },
+            "queue":    {
+                "name":         "consumer_test",
+                "routingKey":   "test",
+                "durable":      false,
+                "autoDelete":   true
+            },
+            "publisher":    false,
+            "consumer":     true
+    	}
+    }
 }
 ```
 The configuration above specifies a connection named *consumer*, which connects to the RabbitMQ server *rabbitmq.example.com* 
