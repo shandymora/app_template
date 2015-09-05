@@ -14,8 +14,8 @@ var handle_http = {
 };
 
 var handle_tcp = {
-	2023:	handlers.fnPort_2023,
-	2024:	handlers.fnPort_2024
+//	port:	handlers.<function>
+//	2023:	handlers.fnPort_2023,
 };
 	
 function http_route(pathname, response, request) {
@@ -26,10 +26,9 @@ function http_route(pathname, response, request) {
   }
 }
 
-function tcp_route(localAddress, localPort, data) {
-	
-	if ( localPort in config.settings.server.tcp ) {
-		if (typeof handle_tcp[pathname] === 'function') {
+function tcp_route(localPort, data) {
+	if ( config.settings.server.tcp.port.indexOf(localPort) >= 0 ) {
+		if (typeof handle_tcp[localPort] === 'function') {
 			handle_tcp[localPort](data);
 		}
 	}

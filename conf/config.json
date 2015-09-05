@@ -56,7 +56,8 @@
                 },
                 "publisher":    false,
                 "consumer":     true
-          },
+          }
+        },
         "redis": {
           "redis01": {
                 "server":   "redis01.example.com",

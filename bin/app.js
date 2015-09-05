@@ -31,7 +31,7 @@ function start(oSettings) {
 	server.start_http_servers(oSettings);
 	
 	// start tcp servers
-	server.start_tcp_servers(oSettings, parse_data);
+	server.start_tcp_servers(oSettings);
 
 	// Connect to Redis
 	client.start_redis_clients(oSettings, function() {

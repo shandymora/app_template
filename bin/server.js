@@ -145,7 +145,7 @@ function smtp_server(settings, done) {
 }
 
 //TCP
-function tcp_server(port, callback) {
+function tcp_server(port) {
 	var tcp_server = {};
 	
 	this.start = function() {
@@ -156,7 +156,7 @@ function tcp_server(port, callback) {
 			if (logger.logLevel.info == true) { logger.log.info('Connection from client:'+socket.remoteAddress+':'+socket.remotePort); }
 			utility.statsd.client.increment(utility.statsd.prefix+'app.server.tcp_server.connection');
 			socket.on('data', function(data) {
-				 if ( callback ) { callback(socket.localAddress, socket.localPort, data); }
+				 router.tcp_route(socket.localPort, data);
 			});
 			
 			socket.on('end', function() { 
@@ -194,14 +194,14 @@ function tcp_server(port, callback) {
 	self.start();
 }
 
-function start_tcp_servers(oSettings, callback) {
+function start_tcp_servers(oSettings) {
 	if ( 'tcp' in oSettings.server ) {
 		if ( utility.isArray(oSettings.server.tcp.port) ) {
 			oSettings.server.tcp.port.forEach( function(port) {
-				config.app_data.tcp_servers[port.toString()] = new tcp_server(port, callback);
+				config.app_data.tcp_servers[port.toString()] = new tcp_server(port);
 			});
 		} else {
-			config.app_data.tcp_servers[oSettings.server.tcp.port.toString()] = new tcp_server(oSettings.server.tcp.port, callback);
+			config.app_data.tcp_servers[oSettings.server.tcp.port.toString()] = new tcp_server(oSettings.server.tcp.port);
 		}
 	}
 }
