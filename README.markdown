@@ -1,4 +1,4 @@
-# app_template
+# app_template - WORK IN PROGRESS
 
 A node.js application template for quick deployment or prototyping.
 
