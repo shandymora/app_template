@@ -30,15 +30,8 @@ It will be quite obvious from a cursory glance at the code that I am in no way a
 # Usage
 ## Servers
 ### TCP Server
-Config 
-```
-{
-	"server": {
-		"tcp": {
-			"port": [ 2023, 2024 ]
-=======
-#### Config
 
+#### Config
 ```
 {
     "server": {
