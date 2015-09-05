@@ -30,7 +30,6 @@ It will be quite obvious from a cursory glance at the code that I am in no way a
 # Usage
 ## Servers
 ### TCP Server
-<<<<<<< HEAD
 Config 
 ```
 {
@@ -45,60 +44,36 @@ Config
     "server": {
 		"tcp": {
 			"port": [ 2003 ]
->>>>>>> 36e6aaaebb2ab7cde7789eba5113d55588b51742
 		}
 	}
 }
 ```
-<<<<<<< HEAD
-An array of ports for the application to listen on.
+The key *port* is an array or port numbers your app should listen on.
 
 Example code, app.js method start:
 ```
-server.start_tcp_servers(oSettings, route_data);
+server.start_tcp_servers(oSettings);
 ```
-A local TCP socket will be created for each port listed in the configuration.  A function should be specified for the second argument
-to route/process data received from any clients. 
+A local TCP socket will be created for each port listed in the configuration.  Data received is routed to a handler function via router.tcp_route
 
-router.js
-```
-function route_data(localAddress, localPort, data) {
-	var port_routes = {
-		2023:	fnPort_2023,
-		2024:	fnPort_2024
-	};
-	
-	if ( localPort in config.settings.server.tcp ) {
-		if (typeof handle[pathname] === 'function') {
-			port_routes[localPort](data);
-		}
-	}
-}
-```
-=======
-
-The key *port* is an array or port numbers your app should listen on.
 
 #### Example code, app.js function start:
 ```
 server.start_tcp_servers(oSettings, parse_data);
 ```
 
-When calling start_tcp_servers, the second parameter is a function that received data should be passed to.  
->>>>>>> 36e6aaaebb2ab7cde7789eba5113d55588b51742
+Once an HTTP server is listening, after calling *start_http_servers*, all connection requests are handled by *router.http_route*.  This
+function decides how to handle the HTTP request and will call the appropriate function from *handlers.js* 
 
-handlers.js
+#### Example code, router.js:
+Calls handler function based on request path:
 ```
-function fnPort_2023(data) {
-	// Do something useful with the data
-	console.log("Got "+data+" from port 2023")
-}
+var handle_tcp = {
+	2023:	handlers.fnPort_2023
+};
+```
+In the example above, data received on TCP port 2023 is routed to handler function handlers.fnPort_2023 for processing.
 
-function fnPort_2024(data) {
-	// Do something useful with the data
-	console.log("Got "+data+" from port 2023")
-}
-```  
 ### HTTP Server
 
 #### Config
@@ -112,15 +87,15 @@ function fnPort_2024(data) {
 }
 ```
 
-The key *port* is an array or port numbers your app should listen on.
+The key *port* is an array of port numbers your app should listen on.
 
 #### Example code, app.js function start:
 ```
 server.start_http_servers(oSettings);
 ```
 
-Once an HTTP server is listening, after calling *start_http_servers*, all connection requests are handled by *router.js*.  This
-module decides how to handle the HTTP request and will call the appropriate function from *handlers.js*
+Once an HTTP server is listening, after calling *start_http_servers*, all connection requests are handled by *router.http_route*.  This
+function decides how to handle the HTTP request and will call the appropriate function from *handlers.js*
 
 #### Example code, router.js:
 Calls handler function based on request path:
@@ -195,7 +170,6 @@ Uses the NPM module [amqplib](http://squaremo.github.io/amqp.node/) version 0.2.
 #### Config
 ```
 {
-<<<<<<< HEAD
 	"client": {
 		"publisher": {
 			"amqpHost":   	"rabbitmq.example.com",
@@ -215,27 +189,6 @@ Uses the NPM module [amqplib](http://squaremo.github.io/amqp.node/) version 0.2.
 	        "consumer":     false
 		}
 	}
-=======
-    "client": {
-    	"publisher": {
-    		"amqpHost":   	"rabbitmq.example.com",
-            "amqpUser":     "shandy",
-            "amqpPassword": "secret",
-            "amqpPort" :    5672,
-            "amqpvHost" :   "app1",
-            "exchange":     {
-                "name":         "app_ex",
-                "type":         "direct",
-                "routingKey":   "test",
-                "durable":      false,
-                "autoDelete":   false,
-                "confirm":      true
-            },
-            "publisher":    true,
-            "consumer":     false
-    	}
-    }
->>>>>>> 36e6aaaebb2ab7cde7789eba5113d55588b51742
 }
 ```
 The configuration above specifies a connection named *publisher*, which connects to the RabbitMQ server *rabbitmq.example.com* 
@@ -252,32 +205,6 @@ Config
 ======
 ```
 {
-<<<<<<< HEAD
-	"client": {
-		"consumer": {
-			"amqpHost":   	"rabbitmq.example.com",
-	        "amqpUser":     "shandy",
-	        "amqpPassword": "secret",
-	        "amqpPort" :    5672,
-	        "amqpvHost" :   "app1",
-	        "exchange":     {
-	            "name":         "app_ex",
-	            "type":         "direct",
-	            "durable":      false,
-	            "autoDelete":   false,
-	            "confirm":      true
-	        },
-	        "queue":    {
-	            "name":         "consumer_test",
-	            "routingKey":   "test",
-	            "durable":      false,
-	            "autoDelete":   true
-	        },
-	        "publisher":    false,
-	        "consumer":     true
-		}
-	}
-=======
     "client": {
     	"consumer": {
     		"amqpHost":   	"rabbitmq.example.com",
@@ -302,7 +229,6 @@ Config
             "consumer":     true
     	}
     }
->>>>>>> 36e6aaaebb2ab7cde7789eba5113d55588b51742
 }
 ```
 The configuration above specifies a connection named *consumer*, which connects to the RabbitMQ server *rabbitmq.example.com* 

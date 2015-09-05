@@ -62,9 +62,7 @@
           "redis01": {
                 "server":   "redis01.example.com",
                 "port":     6379,
-                "db":       3, 
-                "slots":    [ "0-16383" ],
-                "slot_default": true,
+                "db":       3,
                 "config": [
                     {
                         "parameter":    "zset-max-ziplist-entries",
