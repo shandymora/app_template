@@ -41,22 +41,14 @@ It will be quite obvious from a cursory glance at the code that I am in no way a
 	}
 }
 ```
-The key *port* is an array or port numbers your app should listen on.
-
-Example code, app.js method start:
-```
-server.start_tcp_servers(oSettings);
-```
-A local TCP socket will be created for each port listed in the configuration.  Data received is routed to a handler function via router.tcp_route
-
+The key *port* is an array of port numbers your app should listen on.
 
 #### Example code, app.js function start:
 ```
-server.start_tcp_servers(oSettings, parse_data);
+server.start_tcp_servers(oSettings);
 ```
-
-Once an HTTP server is listening, after calling *start_http_servers*, all connection requests are handled by *router.http_route*.  This
-function decides how to handle the HTTP request and will call the appropriate function from *handlers.js* 
+Once a TCP server is listening, after calling *start_tcp_servers*, all connection requests are handled by *router.tcp_route*.  This
+function decides how to handle the TCP connection data and will call the appropriate function from *handlers.js* 
 
 #### Example code, router.js:
 Calls handler function based on request path:
