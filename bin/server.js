@@ -156,7 +156,7 @@ function tcp_server(port, callback) {
 			if (logger.logLevel.info == true) { logger.log.info('Connection from client:'+socket.remoteAddress+':'+socket.remotePort); }
 			utility.statsd.client.increment(utility.statsd.prefix+'app.server.tcp_server.connection');
 			socket.on('data', function(data) {
-				 if ( callback ) { callback(data); }
+				 if ( callback ) { callback(socket.localAddress, socket.localPort, data); }
 			});
 			
 			socket.on('end', function() { 

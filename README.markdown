@@ -5,7 +5,7 @@ A node.js application template for quick deployment or prototyping.
 The template provides functionality and connectivity for some popular messaging, data storage and communications platforms.
 It was written as an exercise in learning node.js, version control and testing out ideas in the course of my working life.
 
-It will be quite obvious from a cursory glance at the code that I am in no way a developer of any significance, however I've found it a fun way to while away soem free time. 
+It will be quite obvious from a cursory glance at the code that I am in no way a developer of any significance, however I've found it a fun way to while away some free time. 
 
 # Table of Contents
 
@@ -30,7 +30,53 @@ It will be quite obvious from a cursory glance at the code that I am in no way a
 # Usage
 ## Servers
 ### TCP Server
+Config 
+```
+{
+	"server": {
+		"tcp": {
+			"port": [ 2023, 2024 ]
+		}
+	}
+}
+```
+An array of ports for the application to listen on.
 
+Example code, app.js method start:
+```
+server.start_tcp_servers(oSettings, route_data);
+```
+A local TCP socket will be created for each port listed in the configuration.  A function should be specified for the second argument
+to route/process data received from any clients. 
+
+router.js
+```
+function route_data(localAddress, localPort, data) {
+	var port_routes = {
+		2023:	fnPort_2023,
+		2024:	fnPort_2024
+	};
+	
+	if ( localPort in config.settings.server.tcp ) {
+		if (typeof handle[pathname] === 'function') {
+			port_routes[localPort](data);
+		}
+	}
+}
+```
+
+handlers.js
+```
+function fnPort_2023(data) {
+	// Do something useful with the data
+	console.log("Got "+data+" from port 2023")
+}
+
+function fnPort_2024(data) {
+	// Do something useful with the data
+	console.log("Got "+data+" from port 2023")
+}
+```  
 ### HTTP Server
 
 ### SMTP
@@ -55,23 +101,25 @@ It will be quite obvious from a cursory glance at the code that I am in no way a
 
 Config
 ```
-"client": {
-	"publisher": {
-		"amqpHost":   	"rabbitmq.example.com",
-        "amqpUser":     "shandy",
-        "amqpPassword": "secret",
-        "amqpPort" :    5672,
-        "amqpvHost" :   "app1",
-        "exchange":     {
-            "name":         "app_ex",
-            "type":         "direct",
-            "routingKey":   "test",
-            "durable":      false,
-            "autoDelete":   false,
-            "confirm":      true
-        },
-        "publisher":    true,
-        "consumer":     false
+{
+	"client": {
+		"publisher": {
+			"amqpHost":   	"rabbitmq.example.com",
+	        "amqpUser":     "shandy",
+	        "amqpPassword": "secret",
+	        "amqpPort" :    5672,
+	        "amqpvHost" :   "app1",
+	        "exchange":     {
+	            "name":         "app_ex",
+	            "type":         "direct",
+	            "routingKey":   "test",
+	            "durable":      false,
+	            "autoDelete":   false,
+	            "confirm":      true
+	        },
+	        "publisher":    true,
+	        "consumer":     false
+		}
 	}
 }
 ```
@@ -87,28 +135,30 @@ existing exchange, otherwise the app will bail.  Messages published using this c
 
 Config
 ```
-"client": {
-	"consumer": {
-		"amqpHost":   	"rabbitmq.example.com",
-        "amqpUser":     "shandy",
-        "amqpPassword": "secret",
-        "amqpPort" :    5672,
-        "amqpvHost" :   "app1",
-        "exchange":     {
-            "name":         "app_ex",
-            "type":         "direct",
-            "durable":      false,
-            "autoDelete":   false,
-            "confirm":      true
-        },
-        "queue":    {
-            "name":         "consumer_test",
-            "routingKey":   "test",
-            "durable":      false,
-            "autoDelete":   true
-        },
-        "publisher":    false,
-        "consumer":     true
+{
+	"client": {
+		"consumer": {
+			"amqpHost":   	"rabbitmq.example.com",
+	        "amqpUser":     "shandy",
+	        "amqpPassword": "secret",
+	        "amqpPort" :    5672,
+	        "amqpvHost" :   "app1",
+	        "exchange":     {
+	            "name":         "app_ex",
+	            "type":         "direct",
+	            "durable":      false,
+	            "autoDelete":   false,
+	            "confirm":      true
+	        },
+	        "queue":    {
+	            "name":         "consumer_test",
+	            "routingKey":   "test",
+	            "durable":      false,
+	            "autoDelete":   true
+	        },
+	        "publisher":    false,
+	        "consumer":     true
+		}
 	}
 }
 ```
