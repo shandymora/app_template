@@ -21,8 +21,8 @@ It will be quite obvious from a cursory glance at the code that I am in no way a
       * [IRC Bot](#ircbot)
       * [TCP Client](#tcp-client)
       * [HTTP Client](#http-client)
-      * [Redis](#redis-client)
-      * [AMQP](#amqp-client)
+      * [Redis Client](#redis-client)
+      * [AMQP Client](#amqp-client)
 * [Required Modules](#required_modules)
 
 # Summary
@@ -30,16 +30,27 @@ It will be quite obvious from a cursory glance at the code that I am in no way a
 # Usage
 ## Servers
 ### TCP Server
+<<<<<<< HEAD
 Config 
 ```
 {
 	"server": {
 		"tcp": {
 			"port": [ 2023, 2024 ]
+=======
+#### Config
+
+```
+{
+    "server": {
+		"tcp": {
+			"port": [ 2003 ]
+>>>>>>> 36e6aaaebb2ab7cde7789eba5113d55588b51742
 		}
 	}
 }
 ```
+<<<<<<< HEAD
 An array of ports for the application to listen on.
 
 Example code, app.js method start:
@@ -64,6 +75,17 @@ function route_data(localAddress, localPort, data) {
 	}
 }
 ```
+=======
+
+The key *port* is an array or port numbers your app should listen on.
+
+#### Example code, app.js function start:
+```
+server.start_tcp_servers(oSettings, parse_data);
+```
+
+When calling start_tcp_servers, the second parameter is a function that received data should be passed to.  
+>>>>>>> 36e6aaaebb2ab7cde7789eba5113d55588b51742
 
 handlers.js
 ```
@@ -79,6 +101,39 @@ function fnPort_2024(data) {
 ```  
 ### HTTP Server
 
+#### Config
+```
+{
+    "server": {
+		"http": {
+			"port": [ 2003 ]
+		}
+	}
+}
+```
+
+The key *port* is an array or port numbers your app should listen on.
+
+#### Example code, app.js function start:
+```
+server.start_http_servers(oSettings);
+```
+
+Once an HTTP server is listening, after calling *start_http_servers*, all connection requests are handled by *router.js*.  This
+module decides how to handle the HTTP request and will call the appropriate function from *handlers.js*
+
+#### Example code, router.js:
+Calls handler function based on request path:
+```
+var handle = {
+	"/" : 				handlers.start,
+  	"/health":  		handlers.appHealth,
+  	"/list":			handlers.list,
+  	"/add": 	        handlers.add,
+  	"/delete":          handlers.delete
+};
+```
+
 ### SMTP
 
 ## Clients
@@ -92,16 +147,55 @@ function fnPort_2024(data) {
 
 ### HTTP Client
 
-### Redis
+### Redis Client
 
-### AMQP
+Uses the NPM module [node_redis](https://github.com/NodeRedis/node_redis) version 0.12.1
 
+#### Config
+```
+{
+    "client": {
+        "redis": {
+		  "redis01": {
+				"server":	"redis.example.com",
+				"port":		6379,
+				"db":		3,
+				"config": [
+					{
+						"parameter":	"zset-max-ziplist-entries",
+						"value":		3000
+					},
+					{
+						"parameter":	"zset-max-ziplist-value",
+						"value":		256
+					}
+				]
+					
+			}
+			
+		}
+	}
+}
+```
+
+Example code, app.js:
+```
+client.start_redis_clients(oSettings, function() {
+	console.log('Redis connections started');
+});
+```
+__ToDo: add publish/subscribe methods__
+
+### AMQP Client
+
+Uses the NPM module [amqplib](http://squaremo.github.io/amqp.node/) version 0.2.0 
 
 #### Publisher
 
-Config
+#### Config
 ```
 {
+<<<<<<< HEAD
 	"client": {
 		"publisher": {
 			"amqpHost":   	"rabbitmq.example.com",
@@ -121,6 +215,27 @@ Config
 	        "consumer":     false
 		}
 	}
+=======
+    "client": {
+    	"publisher": {
+    		"amqpHost":   	"rabbitmq.example.com",
+            "amqpUser":     "shandy",
+            "amqpPassword": "secret",
+            "amqpPort" :    5672,
+            "amqpvHost" :   "app1",
+            "exchange":     {
+                "name":         "app_ex",
+                "type":         "direct",
+                "routingKey":   "test",
+                "durable":      false,
+                "autoDelete":   false,
+                "confirm":      true
+            },
+            "publisher":    true,
+            "consumer":     false
+    	}
+    }
+>>>>>>> 36e6aaaebb2ab7cde7789eba5113d55588b51742
 }
 ```
 The configuration above specifies a connection named *publisher*, which connects to the RabbitMQ server *rabbitmq.example.com* 
@@ -134,8 +249,10 @@ existing exchange, otherwise the app will bail.  Messages published using this c
 #### Consumer
 
 Config
+======
 ```
 {
+<<<<<<< HEAD
 	"client": {
 		"consumer": {
 			"amqpHost":   	"rabbitmq.example.com",
@@ -160,6 +277,32 @@ Config
 	        "consumer":     true
 		}
 	}
+=======
+    "client": {
+    	"consumer": {
+    		"amqpHost":   	"rabbitmq.example.com",
+            "amqpUser":     "shandy",
+            "amqpPassword": "secret",
+            "amqpPort" :    5672,
+            "amqpvHost" :   "app1",
+            "exchange":     {
+                "name":         "app_ex",
+                "type":         "direct",
+                "durable":      false,
+                "autoDelete":   false,
+                "confirm":      true
+            },
+            "queue":    {
+                "name":         "consumer_test",
+                "routingKey":   "test",
+                "durable":      false,
+                "autoDelete":   true
+            },
+            "publisher":    false,
+            "consumer":     true
+    	}
+    }
+>>>>>>> 36e6aaaebb2ab7cde7789eba5113d55588b51742
 }
 ```
 The configuration above specifies a connection named *consumer*, which connects to the RabbitMQ server *rabbitmq.example.com* 
@@ -177,7 +320,7 @@ receiving messages when RabbitMQ routes them.
 
 
 Example code, app.js function start:
-
+====================================
 ```
 client.start_amqp_clients(oSettings.client.amqp, parseMessage, function() {
 	// Start services, call functions reliant on AMQP client connections
@@ -191,5 +334,9 @@ function parseMessage(message) {
 ```
 When calling start_amqp_clients, the second parameter *parseMessage* is a function that should accept received messages.  
 In this example they are just printed to stdout.
+
+__N.B. you could enable both publisher and consumer, but then you'd just consume any messages you published.  Not sure thats 
+useful.__
+
 
 # Required Modules
