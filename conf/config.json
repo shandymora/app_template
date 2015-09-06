@@ -16,7 +16,7 @@
     		"prefix" : "application.example_app.instance"
 		},
 		"amqp": {
-		  "enabled":  true,
+		  "enabled":  false,
           "producer_example": {
               "amqpHost":   "rabbitmq01.example.com",
                 "amqpUser":     "example_user",
