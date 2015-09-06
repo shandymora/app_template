@@ -230,25 +230,28 @@ function send_health_stats(process) {
 	var healthTimer = setInterval( function() {
 		
 		// Calculate change in counters over interval period.  Hardcoded to 60secs currently.
-		var count_full_gc = config.health.memory.heap.num_full_gc - last.num_full_gc;
-		var count_inc_gc = config.health.memory.heap.num_inc_gc - last.num_inc_gc;
-		
-		utility.statsd.client.gauge(utility.statsd.prefix+process+'.health.memory.heap.current_base', config.health.memory.heap.current_base);
-		utility.statsd.client.gauge(utility.statsd.prefix+process+'.health.memory.heap.estimated_base', config.health.memory.heap.estimated_base);
-		utility.statsd.client.gauge(utility.statsd.prefix+process+'.health.memory.heap.usage_trend', config.health.memory.heap.usage_trend);
-		utility.statsd.client.gauge(utility.statsd.prefix+process+'.health.memory.heap.full_gc_count', config.health.memory.heap.num_full_gc);
-		utility.statsd.client.gauge(utility.statsd.prefix+process+'.health.memory.heap.inc_gc_count', config.health.memory.heap.num_inc_gc);
-		
-		utility.statsd.client.increment(utility.statsd.prefix+process+'.health.memory.heap.full_gc', count_full_gc);
-		utility.statsd.client.increment(utility.statsd.prefix+process+'.health.memory.heap.inc_gc', count_inc_gc);
-/*		
-		var process_memory_usage = process.memoryUsage();
-		utility.statsd.client.increment(utility.statsd.prefix+process+'.health.memory.process.rss', process_memory_usage.rss);
-		utility.statsd.client.increment(utility.statsd.prefix+process+'.health.memory.process.heapTotal', process_memory_usage.heapTotal);
-		utility.statsd.client.increment(utility.statsd.prefix+process+'.health.memory.process.heapUsed', process_memory_usage.heapUsed);
-*/		
-		last.num_full_gc = config.health.memory.heap.num_full_gc;
-		last.num_inc_gc = config.health.memory.heap.num_inc_gc;
+		if ( 'heap' in config.health.memory ) {
+			var count_full_gc = config.health.memory.heap.num_full_gc - last.num_full_gc;
+			var count_inc_gc = config.health.memory.heap.num_inc_gc - last.num_inc_gc;
+			
+			utility.statsd.client.gauge(utility.statsd.prefix+process+'.health.memory.heap.current_base', config.health.memory.heap.current_base);
+			utility.statsd.client.gauge(utility.statsd.prefix+process+'.health.memory.heap.estimated_base', config.health.memory.heap.estimated_base);
+			utility.statsd.client.gauge(utility.statsd.prefix+process+'.health.memory.heap.usage_trend', config.health.memory.heap.usage_trend);
+			utility.statsd.client.gauge(utility.statsd.prefix+process+'.health.memory.heap.full_gc_count', config.health.memory.heap.num_full_gc);
+			utility.statsd.client.gauge(utility.statsd.prefix+process+'.health.memory.heap.inc_gc_count', config.health.memory.heap.num_inc_gc);
+			
+			utility.statsd.client.increment(utility.statsd.prefix+process+'.health.memory.heap.full_gc', count_full_gc);
+			utility.statsd.client.increment(utility.statsd.prefix+process+'.health.memory.heap.inc_gc', count_inc_gc);
+	/*		
+			var process_memory_usage = process.memoryUsage();
+			utility.statsd.client.increment(utility.statsd.prefix+process+'.health.memory.process.rss', process_memory_usage.rss);
+			utility.statsd.client.increment(utility.statsd.prefix+process+'.health.memory.process.heapTotal', process_memory_usage.heapTotal);
+			utility.statsd.client.increment(utility.statsd.prefix+process+'.health.memory.process.heapUsed', process_memory_usage.heapUsed);
+	*/		
+			last.num_full_gc = config.health.memory.heap.num_full_gc;
+			last.num_inc_gc = config.health.memory.heap.num_inc_gc;
+		}
+			
 		
 	}, 60000);
 }
