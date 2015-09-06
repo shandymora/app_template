@@ -28,7 +28,6 @@
     "redis" :           "0.12.1",
     "riemann" :         "0.4.3",
     "simplesmtp" :      "0.3.34",
-    "sleep" :           "2.0.0",
     "socket.io" :       "0.9.16",
     "winston" :         "0.7.3"
   },
