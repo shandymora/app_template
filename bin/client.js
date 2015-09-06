@@ -333,16 +333,18 @@ function redisConn (oSettings, ready_callback) {
 
 function start_redis_clients(oSettings, callback) {
 	if ( 'redis' in oSettings.client ) {
-		var name_count = 1;
-		for (var name in oSettings.client.redis) {
-			
-			config.app_data.redis_clients[name] = new redisConn(oSettings.client.redis[name], function() {
-				if ( name_count == Object.keys(oSettings.client.redis).length ) {
-					if (logger.logLevel.info == true) { logger.log.info('Finished connecting to all Redis servers.'); }
-					if ( callback ) { callback(); }
-				}
-				name_count += 1;
-			});
+		if ( 'enabled' in oSettings.client.redis && oSettings.client.redis.enabled == true ) {
+			var name_count = 1;
+			for (var name in oSettings.client.redis) {
+				
+				config.app_data.redis_clients[name] = new redisConn(oSettings.client.redis[name], function() {
+					if ( name_count == Object.keys(oSettings.client.redis).length ) {
+						if (logger.logLevel.info == true) { logger.log.info('Finished connecting to all Redis servers.'); }
+						if ( callback ) { callback(); }
+					}
+					name_count += 1;
+				});
+			}
 		}
 		
 	}
@@ -530,27 +532,30 @@ function amqpConn(settings) {
 function start_amqp_clients(oSettings, consumer_action, done) {
 	
 	var name_count = 0;
-	
-	for (var name in oSettings) {
-		amqp_setup(name);
+	if ( 'amqp' in oSettings.client ) {
+		if ( 'enabled' in oSettings.client.amqp && oSettings.client.amqp.enabled == true ) {
+			for (var name in oSettings.client.amqp) {
+				amqp_setup(name);
+			}
+		}
 	}
 	
 	function amqp_setup(name) {
-		config.app_data.amqp_clients[name] = new amqpConn(oSettings[name]);
+		config.app_data.amqp_clients[name] = new amqpConn(oSettings.client.amqp[name]);
 		config.app_data.amqp_clients[name].connect( function(err) {
 			if (err) {
 				if (logger.logLevel.info == true) { logger.log.info(name+" - Connection failed"); }
 			} else {
 				if (logger.logLevel.info == true) { logger.log.info(name+" - Connection established"); }
 				
-				if ( oSettings[name].publisher) {
+				if ( oSettings.client.amqp[name].publisher) {
 					// Be a publisher
 					config.app_data.amqp_clients[name].publisherConn(function() {
 						if (logger.logLevel.info == true) { logger.log.info(name+" is a publisher"); }
 					});
 				}
 					
-				if ( oSettings[name].consumer) {
+				if ( oSettings.client.amqp[name].consumer) {
 					// Be a consumer
 					config.app_data.amqp_clients[name].consumerConn(function(message) {
 						if (consumer_action) { consumer_action(message); }
@@ -559,7 +564,7 @@ function start_amqp_clients(oSettings, consumer_action, done) {
 				
 				name_count += 1;
 				
-				if ( name_count == Object.keys(oSettings).length ) {
+				if ( name_count == Object.keys(oSettings.client.amqp).length ) {
 					if (logger.logLevel.info == true) { logger.log.info('Finished connecting all AMQP clients.'); }
 					if ( done ) { done(); }
 				}

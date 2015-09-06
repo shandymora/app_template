@@ -196,24 +196,29 @@ function tcp_server(port) {
 
 function start_tcp_servers(oSettings) {
 	if ( 'tcp' in oSettings.server ) {
-		if ( utility.isArray(oSettings.server.tcp.port) ) {
-			oSettings.server.tcp.port.forEach( function(port) {
-				config.app_data.tcp_servers[port.toString()] = new tcp_server(port);
-			});
-		} else {
-			config.app_data.tcp_servers[oSettings.server.tcp.port.toString()] = new tcp_server(oSettings.server.tcp.port);
+		if ( 'enabled' in oSettings.server.tcp && oSettings.server.tcp.enabled == true ) {
+			if ( utility.isArray(oSettings.server.tcp.port) ) {
+				oSettings.server.tcp.port.forEach( function(port) {
+					config.app_data.tcp_servers[port.toString()] = new tcp_server(port);
+				});
+			} else {
+				config.app_data.tcp_servers[oSettings.server.tcp.port.toString()] = new tcp_server(oSettings.server.tcp.port);
+			}
 		}
+			
 	}
 }
 
 function start_http_servers(oSettings, callback) {
 	if ( 'http' in oSettings.server ) {
-		if ( utility.isArray(oSettings.server.http.port) ) {
-			oSettings.server.http.port.forEach( function(port) {
-				config.app_data.http_servers[port.toString()] = new http_server(port);
-			});
-		} else {
-			config.app_data.http_servers[oSettings.server.http.port.toString()] = new http_server(oSettings.server.http.port);
+		if ( 'enabled' in oSettings.server.http && oSettings.server.http.enabled == true ) {
+			if ( utility.isArray(oSettings.server.http.port) ) {
+				oSettings.server.http.port.forEach( function(port) {
+					config.app_data.http_servers[port.toString()] = new http_server(port);
+				});
+			} else {
+				config.app_data.http_servers[oSettings.server.http.port.toString()] = new http_server(oSettings.server.http.port);
+			}
 		}
 	}
 }

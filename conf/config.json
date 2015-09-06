@@ -1,10 +1,12 @@
 {
 	"server": {
 		"http": {
-			"port": [ 8088 ]
+            "enabled":   true,		  
+			"port":      [ 8088 ]
 		},
 		"tcp": {
-			"port": [ 2023 ]
+		    "enabled":   true,
+			"port":      [ 2023 ]
 		}
 	},
 	"client": {
@@ -14,6 +16,7 @@
     		"prefix" : "application.example_app.instance"
 		},
 		"amqp": {
+		  "enabled":  true,
           "producer_example": {
               "amqpHost":   "rabbitmq01.example.com",
                 "amqpUser":     "example_user",
@@ -59,22 +62,23 @@
           }
         },
         "redis": {
-          "redis01": {
-                "server":   "redis01.example.com",
-                "port":     6379,
-                "db":       3,
-                "config": [
-                    {
-                        "parameter":    "zset-max-ziplist-entries",
-                        "value":        3000
-                    },
-                    {
-                        "parameter":    "zset-max-ziplist-value",
-                        "value":        256
-                    }
-                ]
-                    
-            }
+              "enabled":  false,
+              "redis01": {
+                    "server":   "redis01.example.com",
+                    "port":     6379,
+                    "db":       3,
+                    "config": [
+                        {
+                            "parameter":    "zset-max-ziplist-entries",
+                            "value":        3000
+                        },
+                        {
+                            "parameter":    "zset-max-ziplist-value",
+                            "value":        256
+                        }
+                    ]
+                        
+                }
             
         }
 	},
