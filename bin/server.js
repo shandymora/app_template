@@ -40,7 +40,7 @@ function http_server(port) {
 	function onRequest(request, response) {
 		utility.statsd.client.increment(utility.statsd.prefix+'app.server.http_server.request');
     	var pathname = url.parse(request.url).pathname;
-    	router.route(pathname, response, request);
+    	router.http_route(pathname, response, request);
   	}
 
   	var self = this;
