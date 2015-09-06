@@ -39,7 +39,7 @@ function start(oSettings) {
 	});
 	
 	// start amqp clients
-	client.start_amqp_clients(oSettings.client.amqp, parseMessage, function() {
+	client.start_amqp_clients(oSettings, parseMessage, function() {
 		// Start services, call functions reliant on AMQP client connections
 		console.log("completed function start_amqp_clients");
 	});
