@@ -6,6 +6,7 @@
 
 // Include modules
 var config		= require('./config');
+var router		= require('./router');
 var net			= require('net');
 var exec 		= require('child_process').exec;
 var $			= require('jquery');
@@ -454,7 +455,8 @@ function amqpConn(settings) {
 					             		if (logger.logLevel.info == true) { logger.log.info('Received message', { msg: msg }); }
 					                	consumer.ch.ack(msg);
 					                	
-					                	done(consumer.queue, msg);
+					                	// done(consumer.queue, msg);
+					                	router.amqp_route(consumer.queue, msg);
 					                  	
 					                }		// if err on ch.consume
 					            });			// ch.consume function call
