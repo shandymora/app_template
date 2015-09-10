@@ -61,8 +61,8 @@ function start(oSettings) {
 	
 }
 
-function parseMessage(message) {
-	console.log('Consumer received message: '+message.content.toString());
+function parseMessage(queue, message) {
+	console.log('Consumer queue: '+queue+'received message: '+message.content.toString());
 }
 
 function parse_data(data) {

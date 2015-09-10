@@ -410,7 +410,7 @@ function amqpConn(settings) {
 			self.connection = conn;
 			done(false);
 		});
-	}
+	};
 	
 	this.consumerConn = function(done) {
 	  if (logger.logLevel.info == true) { logger.log.info('Consumer Connection established'); }
@@ -454,7 +454,7 @@ function amqpConn(settings) {
 					             		if (logger.logLevel.info == true) { logger.log.info('Received message', { msg: msg }); }
 					                	consumer.ch.ack(msg);
 					                	
-					                	done(msg);
+					                	done(consumer.queue, msg);
 					                  	
 					                }		// if err on ch.consume
 					            });			// ch.consume function call
@@ -486,7 +486,7 @@ function amqpConn(settings) {
 	    
 	    
 	  }						// on_open function
-	}
+	};
 	
 	this.publisherConn = function(done) {
 		  if (logger.logLevel.info == true) { logger.log.info('Publisher Connection established'); }
@@ -524,7 +524,7 @@ function amqpConn(settings) {
 		    	if (logger.logLevel.warn == true) { logger.log.warn('Publisher channel ended'); }
 		    });
 		  }
-	}
+	};
 
 	var self = this;
 }

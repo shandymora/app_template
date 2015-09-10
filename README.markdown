@@ -231,19 +231,18 @@ receiving messages when RabbitMQ routes them.
 
 
 Example code, app.js function start:
-====================================
 ```
 client.start_amqp_clients(oSettings.client.amqp, parseMessage, function() {
 	// Start services, call functions reliant on AMQP client connections
 	console.log("completed function start_amqp_clients");
 });
 
-function parseMessage(message) {
-	console.log('Consumer received message: '+message.content.toString());
+function parseMessage(queue, message) {
+	console.log('Consumer queue: '+queue+'received message: '+message.content.toString());
 }
 
 ```
-When calling start_amqp_clients, the second parameter *parseMessage* is a function that should accept received messages.  
+When calling start_amqp_clients, the second parameter *parseMessage* is a function that should accept a queue name and the received message.  
 In this example they are just printed to stdout.
 
 __N.B. you could enable both publisher and consumer, but then you'd just consume any messages you published.  Not sure thats 
