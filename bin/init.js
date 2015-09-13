@@ -26,7 +26,7 @@ config.app_data.logger = new utility.Logger({
 var logger = config.app_data.logger;
 
 // Include modules
-var memwatch 	= require('memwatch');
+var memwatch 	= require('memwatch-next');
 var app			= require('./app');
 
 // Define command line options to script
