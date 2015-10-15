@@ -6,7 +6,7 @@
 
 // Include modules
 var	fs 				= require("fs");
-var $				= require("jquery");
+// var $				= require("jquery");
 var url				= require("url");
 var querystring		= require("querystring");
 var mime			= require("mime");
@@ -68,7 +68,7 @@ function appHealth(response, request) {
 				
 				// Parse text if its JSON formatted
 			    try {
-					oPayload = $.parseJSON(requestData.toString());
+					oPayload = JSON.parse(requestData.toString());
 				} catch (error) {
 					if (logger.logLevel.error == true) { logger.log.error('RequestData Not JSON format'); }
 					response.writeHeader("Content-Type", "application/json");
