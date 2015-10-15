@@ -17,9 +17,9 @@ var logger = config.app_data.logger;
 function start(oSettings) {
 	
 	// Setup app cluster
-	clusterApp(oSettings.app.cluster, function() {
+//	clusterApp(oSettings.app.cluster, function() {
 		// Do something useful
-	});
+//	});
 	
 	// Initialize statsd client
 	utility.statsd = new client.statsd(oSettings.client.statsd);
