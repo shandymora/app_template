@@ -60,12 +60,12 @@ function elasticsearch(options) {
 		dataType:	'json'
 	};
 	
-	$.extend(true, this.conn_options, options);
+	this.conn_options = utility.merge(this.conn_options, options);
 	
 	this.send = function(send_options, done) {
 		
 		if (send_options) {
-			$.extend(true, self.conn_options, send_options);
+			self.conn_options = utility.merge(self.conn_options, send_options);
 		}
 		
 		$.ajax({
@@ -205,15 +205,20 @@ function tcpConn (oSettings) {
 function httpConn (options, done) {
 	
 	var conn_options = {
-		sMethod:	'POST',
-		oSettings:	{},
-		sPayload:	'',
-		dataType:	'json'
+		hostname: 'localhost',
+		port: 80,
+		path: '/',
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'Content-Length': postData.length
+		}
 	};
 	
-	$.extend(true, conn_options, options);
+	conn_options = utility.merge(conn_options, options);
 	
 	try {
+	/*
 		$.ajax({
 		    type: 	conn_options.sMethod,
 		    url: 	conn_options.oSettings.url,
@@ -233,15 +238,43 @@ function httpConn (options, done) {
 		    	if (logger.logLevel.warn == true) { logger.log.warn('Unable to post HTTP message to: '+conn_options.oSettings.url); }
 	    	
 		    	var responseStatus = xhr.statusCode();
-	//			if (logger.logLevel.error == true) { logger.log.error('ERROR - xhr.statusCode: '+JSON.stringify(responseStatus.status,undefined,2)); }
+				if (logger.logLevel.error == true) { logger.log.error('ERROR - xhr.statusCode: '+JSON.stringify(responseStatus.status,undefined,2)); }
 				
 				var responseHeader = xhr.getResponseHeader("Content-Type");		
-	//			if (logger.logLevel.error == true) { logger.log.error('ERROR: xhr.Content-Type: '+JSON.stringify(responseHeader,undefined,2)); }
+				if (logger.logLevel.error == true) { logger.log.error('ERROR: xhr.Content-Type: '+JSON.stringify(responseHeader,undefined,2)); }
 		    	done(true, responseStatus.status, err);
 		    },
 		    contentType: "application/json",
 		    dataType: conn_options.dataType
 		});
+	*/	
+		var req = http.request(conn_options, function(res) {
+			
+			// res is instance of http.ClientRequest
+			
+			var data = '';
+  			console.log('STATUS: ' + res.statusCode);
+  			console.log('HEADERS: ' + JSON.stringify(res.headers,undefined,2));
+  			console.log('METHOD: '+ JSON.stringify(res.method,undefined,2));
+  			
+  			res.setEncoding('utf8');
+  			res.on('data', function (chunk) {
+				console.log('BODY: ' + chunk);
+				data += chunk;
+  			});
+  			
+  			res.on('end', function() {
+    			console.log('No more data in response.');
+    			console.log('DATA: '+JSON.stringify(data,undefined,2));
+  			});
+		});
+
+		req.on('error', function(e) {
+  			console.log('problem with request: ' + e.message);
+		});
+		
+		req.end();
+		
 	} catch(error) {
 		console.log('BIG ASS HTTP ERROR: '+JSON.stringify(error,undefined,2));
 	}
@@ -256,7 +289,7 @@ function redisConn (oSettings, ready_callback) {
 		db:			0
 	};
 	
-	$.extend(true, oOptions, oSettings);
+	oOptions = utility.merge(oOptions, oSettings);
 	
 	var connect_options = {
 		retry_max_delay:	10000
