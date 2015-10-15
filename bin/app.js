@@ -6,7 +6,6 @@
 
 // Include modules
 var config		= require('./config');
-var $			= require('jquery');
 var client		= require('./client');
 var server		= require('./server');
 var utility		= require('./utility');

@@ -7,7 +7,7 @@
 // Include modules
 var config			= require("./config");
 var utility			= require("./utility");
-var $				= require('jquery');
+// var $				= require('jquery');
 var winston			= require('winston');
 var fs 				= require('fs');
 
@@ -35,7 +35,7 @@ function readConfig(file, done) {
 	
     // Test if well formed JSON
     try {
-		var app_config = $.parseJSON(contents.toString());
+		var app_config = JSON.parse(contents.toString());
 	} catch (error) {
 		if (config.app_data.logger.logLevel.error == true) { config.app_data.logger.log.error('Invald JSON configuration file'); }
 		console.log('error reading config file: '+JSON.stringify(error, undefined, 2));
@@ -116,6 +116,33 @@ function uniqueArray(a) {
     }, []);
 }
 
+function merge() {
+    var destination = {},
+    sources = [].slice.call( arguments, 0 );
+	sources.forEach(function( source ) {
+        var prop;
+        for ( prop in source ) {
+            if ( prop in destination && Array.isArray( destination[ prop ] ) ) {
+                
+                // Concat Arrays
+                destination[ prop ] = destination[ prop ].concat( source[ prop ] );
+                
+            } else if ( prop in destination && typeof destination[ prop ] === "object" ) {
+                
+                // Merge Objects
+                destination[ prop ] = merge( destination[ prop ], source[ prop ] );
+                
+            } else {
+                
+                // Set new values
+                destination[ prop ] = source[ prop ];
+                
+            }
+        }
+	});
+    return destination;
+}
+
 function timeInSecs (sDateString) {
 	if (sDateString) {
 		var d = new Date(sDateString);
@@ -176,7 +203,9 @@ function Logger(options, done_start) {
 		log_for 	: 'events'
 	};
 	
-	$.extend(true, this.logger_options, options);
+//	$.extend(true, this.logger_options, options);
+
+	this.logger_options = merge(this.logger_options, options);
 	
 	// Private
 	this.log = new (winston.Logger);
