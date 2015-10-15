@@ -7,7 +7,6 @@
 // Include modules
 var config			= require("./config");
 var utility			= require("./utility");
-// var $				= require('jquery');
 var winston			= require('winston');
 var fs 				= require('fs');
 
@@ -203,8 +202,6 @@ function Logger(options, done_start) {
 		log_for 	: 'events'
 	};
 	
-//	$.extend(true, this.logger_options, options);
-
 	this.logger_options = merge(this.logger_options, options);
 	
 	// Private

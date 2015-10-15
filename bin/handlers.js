@@ -6,7 +6,6 @@
 
 // Include modules
 var	fs 				= require("fs");
-// var $				= require("jquery");
 var url				= require("url");
 var querystring		= require("querystring");
 var mime			= require("mime");

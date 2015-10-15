@@ -8,7 +8,6 @@
 var http 		= require('http');
 var url 		= require('url');
 var net			= require('net');
-// var $			= require('jquery');
 var config		= require('./config');
 var router		= require('./router');
 var simplesmtp 	= require("simplesmtp");
