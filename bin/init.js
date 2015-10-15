@@ -3,7 +3,7 @@
  * author: 	amora
  * 
  */
-require('look').start();
+//require('look').start();
 require('longjohn');
 
 // Setup Logging
