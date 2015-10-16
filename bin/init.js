@@ -3,8 +3,6 @@
  * author: 	amora
  * 
  */
-//require('look').start();
-require('longjohn');
 
 // Setup Logging
 var config		= require('./config');
