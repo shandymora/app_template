@@ -540,7 +540,6 @@ function start_amqp_clients(oSettings, consumer_action, done) {
 exports.tcpConn = tcpConn;
 exports.httpConn = httpConn;
 exports.statsd = statsd;
-exports.elasticsearch = elasticsearch;
 exports.ircBot = ircBot;
 exports.redisConn = redisConn;
 exports.start_redis_clients = start_redis_clients;
