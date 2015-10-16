@@ -27,6 +27,10 @@ function http_server(port) {
 	this.start = function() {
 		http_app_server = http.createServer(onRequest).listen(port);
 		if (logger.logLevel.info == true) { logger.log.info('HTTP Server has started on port '+port); }
+		
+		http_app_server.on('error', function(e) {
+			if (logger.logLevel.error == true) { logger.log.error('HTTP Server connection error', {error:e}); }
+		});
 	};
 	
 	this.stop = function(callback) {
