@@ -6,7 +6,6 @@
 
 // Include modules
 var config			= require("./config");
-var utility			= require("./utility");
 var winston			= require('winston');
 var fs 				= require('fs');
 
@@ -260,6 +259,15 @@ function send_health_stats(process) {
 			var count_full_gc = config.health.memory.heap.num_full_gc - last.num_full_gc;
 			var count_inc_gc = config.health.memory.heap.num_inc_gc - last.num_inc_gc;
 			
+			statsd.client.gauge(statsd.prefix+process+'.health.memory.heap.current_base', config.health.memory.heap.current_base);
+			statsd.client.gauge(statsd.prefix+process+'.health.memory.heap.estimated_base', config.health.memory.heap.estimated_base);
+			statsd.client.gauge(statsd.prefix+process+'.health.memory.heap.usage_trend', config.health.memory.heap.usage_trend);
+			statsd.client.gauge(statsd.prefix+process+'.health.memory.heap.full_gc_count', config.health.memory.heap.num_full_gc);
+			statsd.client.gauge(statsd.prefix+process+'.health.memory.heap.inc_gc_count', config.health.memory.heap.num_inc_gc);
+			
+			statsd.client.increment(statsd.prefix+process+'.health.memory.heap.full_gc', count_full_gc);
+			statsd.client.increment(statsd.prefix+process+'.health.memory.heap.inc_gc', count_inc_gc);
+		/*	
 			utility.statsd.client.gauge(utility.statsd.prefix+process+'.health.memory.heap.current_base', config.health.memory.heap.current_base);
 			utility.statsd.client.gauge(utility.statsd.prefix+process+'.health.memory.heap.estimated_base', config.health.memory.heap.estimated_base);
 			utility.statsd.client.gauge(utility.statsd.prefix+process+'.health.memory.heap.usage_trend', config.health.memory.heap.usage_trend);
@@ -268,6 +276,8 @@ function send_health_stats(process) {
 			
 			utility.statsd.client.increment(utility.statsd.prefix+process+'.health.memory.heap.full_gc', count_full_gc);
 			utility.statsd.client.increment(utility.statsd.prefix+process+'.health.memory.heap.inc_gc', count_inc_gc);
+		*/
+			
 	/*		
 			var process_memory_usage = process.memoryUsage();
 			utility.statsd.client.increment(utility.statsd.prefix+process+'.health.memory.process.rss', process_memory_usage.rss);
@@ -281,6 +291,8 @@ function send_health_stats(process) {
 		
 	}, 60000);
 }
+
+
 
 // start statsd client
 var statsd = {};
@@ -302,3 +314,4 @@ exports.Timer = Timer;
 exports.Logger = Logger;
 exports.crc16 = crc16;
 exports.send_health_stats = send_health_stats;
+
