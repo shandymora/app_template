@@ -209,6 +209,7 @@ function httpConn (options, done) {
 		port: 80,
 		path: '/',
 		method: 'POST',
+		postData: '',
 		headers: {
 			'Content-Type': 'application/json',
 			'Content-Length': postData.length
