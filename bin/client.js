@@ -211,8 +211,8 @@ function httpConn (options, done) {
 		method: 'POST',
 		postData: '',
 		headers: {
-			'Content-Type': 'application/json',
-			'Content-Length': postData.length
+			'Content-Type': 'application/json'
+//			'Content-Length': postData.length
 		}
 	};
 	
