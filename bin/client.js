@@ -259,7 +259,7 @@ function httpConn (options, done) {
   			
   			res.setEncoding('utf8');
   			res.on('data', function (chunk) {
-				console.log('BODY: ' + chunk);
+				console.log('CHUNK: ' + chunk);
 				data += chunk;
   			});
   			

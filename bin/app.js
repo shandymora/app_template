@@ -57,7 +57,17 @@ function start(oSettings) {
 			
 		}, 60000);
 	}
-	
+
+	/*
+	 * 	Test client.httpConn
+	 */	
+	 
+	client.httpConn({
+		hostname:	'localhost',
+		port:		8088,
+		path:		'/health?show=heap',
+		method:		'GET'
+	});
 }
 
 function parseMessage(queue, message) {
