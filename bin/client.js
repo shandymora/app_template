@@ -9,7 +9,7 @@ var config		= require('./config');
 var router		= require('./router');
 var net			= require('net');
 var exec 		= require('child_process').exec;
-// var $			= require('jquery');
+var http	    = require('http');
 var StatsD		= require('node-statsd').StatsD;
 var irc 		= require("irc");
 var utility		= require('./utility');
@@ -47,63 +47,6 @@ function statsd(oSettings) {
 	
 	var self = this;
 	self.start();
-	
-}
-
-// Elasticsearch
-function elasticsearch(options) {
-	
-	this.conn_options = {
-		sMethod:	'POST',
-		oSettings:	{},
-		sPayload:	'',
-		dataType:	'json'
-	};
-	
-	this.conn_options = utility.merge(this.conn_options, options);
-	
-	this.send = function(send_options, done) {
-		
-		if (send_options) {
-			self.conn_options = utility.merge(self.conn_options, send_options);
-		}
-		
-		$.ajax({
-		    type: 	self.conn_options.sMethod,
-		    url: 	self.conn_options.oSettings.url,
-		    data: 	self.conn_options.sPayload, 				// or JSON.stringify ({name: 'jonas'}),
-		    success: function(data, status, xhr) {
-		    	var responseStatus = xhr.statusCode();
-				if (logger.logLevel.debug == true) { logger.log.debug('xhr.statusCode: '+JSON.stringify(responseStatus.status,undefined,2)); }
-				
-				var responseHeader = xhr.getResponseHeader("Content-Type");		
-				if (logger.logLevel.debug == true) { logger.log.debug('xhr.Content-Type: '+JSON.stringify(responseHeader,undefined,2)); }
-		 
-		 		if (logger.logLevel.info == true) { logger.log.info('Successfully indexed message', {data:data}); }
-		 		
-		    	done(false, responseStatus.status, data);
-		    },
-		    error: function(xhr, status, err) {
-		    	if (logger.logLevel.warn == true) { logger.log.warn('Unable to post message', { error: err } ); }
-		    	
-		    	var responseStatus = xhr.statusCode();
-				if (logger.logLevel.error == true) { logger.log.error('ERROR - xhr.statusCode: '+JSON.stringify(responseStatus.status,undefined,2)); }
-				
-				var responseHeader = xhr.getResponseHeader("Content-Type");		
-				if (logger.logLevel.error == true) { logger.log.error('ERROR: xhr.Content-Type: '+JSON.stringify(responseHeader,undefined,2)); }
-		    	done(true, responseStatus.status, err);
-		    },
-		    contentType: "application/json",
-		    dataType: 'json'
-		});
-	};
-	
-	this.close = function(done) {
-		
-	};
-	
-	var self = this;
-	if (logger.logLevel.info == true) { logger.log.info('Created Elasticsearch client', { url: this.conn_options.oSettings.url } ); }
 	
 }
 
@@ -209,75 +152,43 @@ function httpConn (options, done) {
 		port: 80,
 		path: '/',
 		method: 'POST',
-		postData: '',
+		postData: null,
 		headers: {
 			'Content-Type': 'application/json'
-//			'Content-Length': postData.length
-		}
+		},
+		setEncoding: 'utf8'
 	};
 	
 	conn_options = utility.merge(conn_options, options);
 	
 	try {
-	/*
-		$.ajax({
-		    type: 	conn_options.sMethod,
-		    url: 	conn_options.oSettings.url,
-		    data: 	conn_options.sPayload, 
-		    success: function(data, status, xhr) { 
-	
-				var responseStatus = xhr.statusCode();
-				if (logger.logLevel.debug == true) { logger.log.debug('xhr.statusCode: '+JSON.stringify(responseStatus.status,undefined,2)); }
-				
-				var responseHeader = xhr.getResponseHeader("Content-Type");		
-				if (logger.logLevel.debug == true) { logger.log.debug('xhr.Content-Type: '+JSON.stringify(responseHeader,undefined,2)); }
-		 
-		    	done(false, responseStatus.status, data);
-	
-		    },
-		    error: function(xhr, status, err) {
-		    	if (logger.logLevel.warn == true) { logger.log.warn('Unable to post HTTP message to: '+conn_options.oSettings.url); }
-	    	
-		    	var responseStatus = xhr.statusCode();
-				if (logger.logLevel.error == true) { logger.log.error('ERROR - xhr.statusCode: '+JSON.stringify(responseStatus.status,undefined,2)); }
-				
-				var responseHeader = xhr.getResponseHeader("Content-Type");		
-				if (logger.logLevel.error == true) { logger.log.error('ERROR: xhr.Content-Type: '+JSON.stringify(responseHeader,undefined,2)); }
-		    	done(true, responseStatus.status, err);
-		    },
-		    contentType: "application/json",
-		    dataType: conn_options.dataType
-		});
-	*/	
+		
 		var req = http.request(conn_options, function(res) {
-			
-			// res is instance of http.ClientRequest
-			
 			var data = '';
-  			console.log('STATUS: ' + res.statusCode);
-  			console.log('HEADERS: ' + JSON.stringify(res.headers,undefined,2));
-  			console.log('METHOD: '+ JSON.stringify(res.method,undefined,2));
+			
+  			res.setEncoding(conn_options.setEncoding);
   			
-  			res.setEncoding('utf8');
   			res.on('data', function (chunk) {
-				console.log('CHUNK: ' + chunk);
 				data += chunk;
   			});
   			
-  			res.on('end', function() {
-    			console.log('No more data in response.');
-    			console.log('DATA: '+JSON.stringify(data,undefined,2));
+  			res.on('end', function() {		
+    			done(false, res.statusCode, data);
   			});
 		});
 
 		req.on('error', function(e) {
-  			console.log('problem with request: ' + e.message);
+  			if (logger.logLevel.error == true) { logger.log.error('client.httpConn request error.', {error: e.message}); }
+  			done(true, res.statusCode, e);
 		});
 		
+		if (conn_options.postData != null) {
+			req.write(conn_options.postData);
+		}
 		req.end();
 		
 	} catch(error) {
-		console.log('BIG ASS HTTP ERROR: '+JSON.stringify(error,undefined,2));
+		if (logger.logLevel.error == true) { logger.log.error('client.httpConn connection error.', {error: error}); }
 	}
 }
 
