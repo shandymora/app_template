@@ -84,7 +84,7 @@ function ircBot(oSettings) {
 };
 
 // TCP
-function tcpConn (oSettings) {
+function tcpConn (oSettings, fnParseData) {
 	
 	this.connected 	= false;
 	this.error		= false;
@@ -110,6 +110,12 @@ function tcpConn (oSettings) {
 			self.connected = true;
 		});
 		
+		client.on('data', function(data) {
+			if (fnParseData) {
+				fnParseData(data);
+			}
+		});
+
 		conn.on('error', function(err) { 
 			if (logger.logLevel.info == true) { logger.log.info('Error in connecting to '+oSettings.host+' on port '+oSettings.port, {error: err}); }
 			self.connected = false;
@@ -143,6 +149,15 @@ function tcpConn (oSettings) {
 		conn.end();
 		done();
 	};
+}
+
+// In development.  Will use router module to parse received data to the correct function for processing.
+function start_tcp_clients(oSettings) {
+	if ( 'tcp' in oSettings.client ) {
+		for ( var name in oSettings.client.tcp ) {
+			
+		}
+	}
 }
 
 function httpConn (options, done) {
