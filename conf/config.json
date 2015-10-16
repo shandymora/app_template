@@ -85,6 +85,7 @@
 	"app": {
 		"auto_reload_config":	false,
 		"cluster": {
+		    "enabled":          false,
 			"heartbeat":		10000,
 			"nodes":			[ "localhost" ]
 		}
