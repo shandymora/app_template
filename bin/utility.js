@@ -294,6 +294,7 @@ exports.arrayMax = arrayMax;
 exports.isFloat = isFloat;
 exports.isInteger = isInteger;
 exports.uniqueArray = uniqueArray;
+exports.merge = merge;
 exports.timeInSecs = timeInSecs;
 exports.timeAsString = timeAsString;
 exports.statsd = statsd;
