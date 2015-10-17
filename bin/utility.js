@@ -265,8 +265,8 @@ function send_health_stats(process) {
 			config.app_data.statsd.client.gauge(config.app_data.statsd.prefix+process+'.health.memory.heap.full_gc_count', config.health.memory.heap.num_full_gc);
 			config.app_data.statsd.client.gauge(config.app_data.statsd.prefix+process+'.health.memory.heap.inc_gc_count', config.health.memory.heap.num_inc_gc);
 			
-			config.app_data.statsd.client.increment(statsd.prefix+process+'.health.memory.heap.full_gc', count_full_gc);
-			config.app_data.statsd.client.increment(statsd.prefix+process+'.health.memory.heap.inc_gc', count_inc_gc);
+			config.app_data.statsd.client.increment(config.app_data.statsd.prefix+process+'.health.memory.heap.full_gc', count_full_gc);
+			config.app_data.statsd.client.increment(config.app_data.statsd.prefix+process+'.health.memory.heap.inc_gc', count_inc_gc);
 		/*	
 			utility.statsd.client.gauge(utility.statsd.prefix+process+'.health.memory.heap.current_base', config.health.memory.heap.current_base);
 			utility.statsd.client.gauge(utility.statsd.prefix+process+'.health.memory.heap.estimated_base', config.health.memory.heap.estimated_base);
