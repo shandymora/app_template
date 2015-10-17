@@ -7,14 +7,16 @@
 // Include modules
 var config		= require('./config');
 var router		= require('./router');
+var utility		= require('./utility');
+
+// Include external modules
 var net			= require('net');
 var exec 		= require('child_process').exec;
 var http	    = require('http');
 var StatsD		= require('node-statsd').StatsD;
-var irc 		= require("irc");
-var utility		= require('./utility');
-var redis		= require('redis');
-var amqp 		= require('amqplib/callback_api');
+//var irc 		= require("irc");
+//var redis		= require('redis');
+//var amqp 		= require('amqplib/callback_api');
 
 // Logging parameters
 var logger = config.app_data.logger;
@@ -71,7 +73,7 @@ function ircBot(oSettings) {
 	this.sendMessage = function(message) {
 		
 		self.bot.say(oSettings.channels, message );
-		utility.statsd.client.increment(utility.statsd.prefix+'app.client.ircBot.say_count');
+		config.app_data.statsd.client.increment(config.app_data.statsd.prefix+'app.client.ircBot.say_count');
 	};
 	
 	this.stop = function() {
@@ -110,7 +112,7 @@ function tcpConn (oSettings, fnParseData) {
 			self.connected = true;
 		});
 		
-		client.on('data', function(data) {
+		conn.on('data', function(data) {
 			if (fnParseData) {
 				fnParseData(data);
 			}

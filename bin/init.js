@@ -13,7 +13,8 @@ config.app_data = {
 	http_servers:			{},
 	redis_clients:			{},
 	ircBots:				{},
-	amqp_clients:			{}
+	amqp_clients:			{},
+	statsd:					{}
 };
 
 var currentDir = config.currentDir;

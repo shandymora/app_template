@@ -4,16 +4,18 @@
  * 
  */
 
-// Include modules
+// Include app modules
+var config		= require('./config');
+var router		= require('./router');
+var client		= require('./client');
+var utility		= require('./utility');
+
+// Include external modules
 var http 		= require('http');
 var url 		= require('url');
 var net			= require('net');
-var config		= require('./config');
-var router		= require('./router');
-var simplesmtp 	= require("simplesmtp");
-var MailParser  = require("mailparser").MailParser;
-var client		= require('./client');
-var utility		= require('./utility');
+//var simplesmtp 	= require("simplesmtp");
+//var MailParser  = require("mailparser").MailParser;
 
 // Logging parameters
 var currentDir = config.currentDir;
@@ -41,7 +43,7 @@ function http_server(port) {
 	};
 
 	function onRequest(request, response) {
-		utility.statsd.client.increment(utility.statsd.prefix+'app.server.http_server.request');
+		config.app_data.statsd.client.increment(config.app_data.statsd.prefix+'app.server.http_server.request');
     	var pathname = url.parse(request.url).pathname;
     	router.http_route(pathname, response, request);
   	}
@@ -110,7 +112,7 @@ function smtp_server(settings, done) {
 					priority:	mail_object.priority
 				};
 				
-				utility.statsd.client.increment(utility.statsd.prefix+'app.server.smtp_server.message_parsed_count');
+				config.app_data.statsd.client.increment(config.app_data.statsd.prefix+'app.server.smtp_server.message_parsed_count');
 				
 				if (logger.logLevel.info == true) { logger.log.info('received mail', {message:parsedMessage}); }
 				
@@ -157,7 +159,7 @@ function tcp_server(port) {
 		
 		tcp_server.on('connection', function(socket) {
 			if (logger.logLevel.info == true) { logger.log.info('Connection from client:'+socket.remoteAddress+':'+socket.remotePort); }
-			utility.statsd.client.increment(utility.statsd.prefix+'app.server.tcp_server.connection');
+			config.app_data.statsd.client.increment(config.app_data.statsd.prefix+'app.server.tcp_server.connection');
 			socket.on('data', function(data) {
 				 router.tcp_route(socket.localPort, data);
 			});

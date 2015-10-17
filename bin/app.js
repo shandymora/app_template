@@ -26,7 +26,7 @@ function start(oSettings) {
 	}
 	
 	// Initialize statsd client
-	 utility.statsd = new client.statsd(oSettings.client.statsd);
+	 config.app_data.statsd = new client.statsd(oSettings.client.statsd);
 	// Setup timer to send health stats every 60s
 	 utility.send_health_stats('app');
 	
