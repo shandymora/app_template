@@ -119,7 +119,7 @@ function tcpConn (oSettings, fnParseData) {
 		});
 
 		conn.on('error', function(err) { 
-			if (logger.logLevel.info == true) { logger.log.info('Error in connecting to '+oSettings.host+' on port '+oSettings.port, {error: err}); }
+			if (logger.logLevel.info == true) { logger.log.error('Error in connecting to '+oSettings.host+' on port '+oSettings.port, {error: err}); }
 			self.connected = false;
 			self.error = true;
 		});
@@ -131,10 +131,11 @@ function tcpConn (oSettings, fnParseData) {
 		
 		function reconnect() {
 			if (retryCount >= maxRetries) { 
-				if (logger.logLevel.info == true) { logger.log.info('Max retries to '+oSettings.host+' on port '+oSettings.port+' have been exceeded, giving up.'); }
+				if (logger.logLevel.info == true) { logger.log.error('Max retries to '+oSettings.host+' on port '+oSettings.port+' have been exceeded, giving up.'); }
 				self.connected = false;
 				conn.end();
 			} else {
+				if (logger.logLevel.info == true) { logger.log.warn('Retrying connection to: '+oSettings.host+' on port '+oSettings.port); }
 				retryCount += 1; 
 				setTimeout(connect, retryInterval);
 			}

@@ -10,6 +10,7 @@ var utility		= require('./utility');
 config.app_data = {
 	logger:					{},
 	tcp_servers:			{},
+	tcp_clients:			{},
 	http_servers:			{},
 	redis_clients:			{},
 	ircBots:				{},
