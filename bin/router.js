@@ -21,6 +21,7 @@ var handle_tcp = {
 var handle_amqp = {
 	// queue:	handlers.<function>
 	// test_queue:	handlers.amqp_test_queue
+	"test_queue": 	handlers.amqp_parse_message		// Example route for messages received on queue test_queue
 };
 
 function http_route(pathname, response, request) {
@@ -39,10 +40,12 @@ function tcp_route(localPort, data) {
 	}
 }
 
-function amqp_route(queue, message) {
+function amqp_route(channel, queue, message) {
+
 	if (typeof handle_amqp[queue] === 'function') {
-		handler_amqp[queue](message);
+		handle_amqp[queue](channel, message);
 	}
+
 }
 
 // Export variables/functions

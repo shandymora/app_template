@@ -317,18 +317,14 @@ function start_redis_clients(oSettings, callback) {
 function amqpConn(settings) {
 	
 	// Determine queue name
-	var queue_name = '';
+	//var queue_name = '';
 	
-	if ( settings.consumer == true && 'queue' in settings ) {
-		if ( 'name' in settings.queue ) { queue_name = settings.queue.name; } 
-		else { queue_name = settings.exchange.name+'_'+config.my_hostname; }
-	}
-		
 	var consumer = {
 		ch:			{},
-		queue:  	queue_name,
+		queue:  	'',
 		timeout:	1000,
-		backoff:	1
+		backoff:	1,
+		routingKey: ''
 	};
 	
 	var publisher = {
@@ -337,7 +333,11 @@ function amqpConn(settings) {
 		backoff:	1
 	};
 	
-	this.connection = {};
+	if ( settings.consumer == true && 'queue' in settings ) {
+		if ( 'name' in settings.queue ) { consumer.queue = settings.queue.name; } 
+		else { consumer.queue = settings.exchange.name+'_'+config.my_hostname; }
+		if ( 'routingKey' in settings.queue ) { consumer.routingKey = settings.queue.routingKey; }
+	}
 	
 	
 	this.publish = function(message) {
@@ -355,8 +355,8 @@ function amqpConn(settings) {
 			'@'+settings.amqpHost+':'+settings.amqpPort+'/'+settings.amqpvHost+'?heartbeat=20', function(err, conn) {
 		
 			if ( err != null ) { 
-				if (logger.logLevel.error == true) { logger.log.error('ERROR: '+err); } 
-				console.log('ERROR: '+err);
+				if (logger.logLevel.error == true) { logger.log.error('Connection error: '+err); } 
+				console.log('Connection error to '+settings.amqpHost+' port '+settings.amqpPort+', for user: '+settings.amqpUser+':'+settings.amqpPassword+', vHost: '+settings.amqpvHost+' - '+err);
 				process.exit(1); 
 			}
 			if (logger.logLevel.info == true) { logger.log.info('Connection to '+settings.amqpHost+' succeeded'); }
@@ -416,10 +416,10 @@ function amqpConn(settings) {
 					            consumer.ch.consume(consumer.queue, function(msg) {
 					                if (msg !== null) {
 					             		if (logger.logLevel.info == true) { logger.log.info('Received message', { msg: msg }); }
-					                	consumer.ch.ack(msg);
 					                	
-					                	// done(consumer.queue, msg);
-					                	router.amqp_route(consumer.queue, msg);
+					                	// Route message to correct handler
+					                	router.amqp_route(consumer.ch, consumer.queue, msg);
+					                	
 					                  	
 					                }		// if err on ch.consume
 					            });			// ch.consume function call
@@ -440,7 +440,7 @@ function amqpConn(settings) {
 	    	if (logger.logLevel.warn == true) { logger.log.warn('Consumer channel closed'); }
 	    	
 	    	setTimeout( function() {
-	    		self.consumerConn(done);
+	    		self.consumerConn();
 				consumer.backoff += 1;
 	    	}, consumer.timeout*consumer.backoff);
 	    	
@@ -499,37 +499,36 @@ function start_amqp_clients(oSettings, consumer_action, done) {
 	var name_count = 0;
 	if ( 'amqp' in oSettings.client ) {
 		if ( 'enabled' in oSettings.client.amqp && oSettings.client.amqp.enabled == true ) {
-			for (var name in oSettings.client.amqp) {
+			for (var name in oSettings.client.amqp.connections) {
 				amqp_setup(name);
 			}
 		}
 	}
 	
 	function amqp_setup(name) {
-		config.app_data.amqp_clients[name] = new amqpConn(oSettings.client.amqp[name]);
+		
+		config.app_data.amqp_clients[name] = new amqpConn(oSettings.client.amqp.connections[name]);
 		config.app_data.amqp_clients[name].connect( function(err) {
 			if (err) {
 				if (logger.logLevel.info == true) { logger.log.info(name+" - Connection failed"); }
 			} else {
 				if (logger.logLevel.info == true) { logger.log.info(name+" - Connection established"); }
 				
-				if ( oSettings.client.amqp[name].publisher) {
+				if ( oSettings.client.amqp.connections[name].publisher) {
 					// Be a publisher
 					config.app_data.amqp_clients[name].publisherConn(function() {
 						if (logger.logLevel.info == true) { logger.log.info(name+" is a publisher"); }
 					});
 				}
 					
-				if ( oSettings.client.amqp[name].consumer) {
+				if ( oSettings.client.amqp.connections[name].consumer) {
 					// Be a consumer
-					config.app_data.amqp_clients[name].consumerConn(function(message) {
-						if (consumer_action) { consumer_action(message); }
-					});
+					config.app_data.amqp_clients[name].consumerConn();
 				}
 				
 				name_count += 1;
 				
-				if ( name_count == Object.keys(oSettings.client.amqp).length ) {
+				if ( name_count == Object.keys(oSettings.client.amqp.connections).length ) {
 					if (logger.logLevel.info == true) { logger.log.info('Finished connecting all AMQP clients.'); }
 					if ( done ) { done(); }
 				}

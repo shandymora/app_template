@@ -17,49 +17,51 @@
 		},
 		"amqp": {
 		  "enabled":  false,
-          "producer_example": {
-              "amqpHost":   "rabbitmq01.example.com",
-                "amqpUser":     "example_user",
-                "amqpPassword": "example_password",
-                "amqpPort" :    5672,
-                "amqpvHost" :   "sensu",
-                "exchange":     {
-                    "name":         "example_exchange",
-                    "type":         "direct",
-                    "routingKey":   "test",
-                    "durable":      false,
-                    "autoDelete":   false,
-                    "confirm":      true
-                },
-                "queue":    {
-                    "durable":      false,
-                    "autoDelete":   true
-                },
-                "publisher":    true,
-                "consumer":     false
-          },
-          "consumer_example": {
-              "amqpHost":   "rabbitmq02.example.com",
-                "amqpUser":     "example_user",
-                "amqpPassword": "example_password",
-                "amqpPort" :    5672,
-                "amqpvHost" :   "sensu",
-                "exchange":     {
-                    "name":         "example_exchange",
-                    "type":         "direct",
-                    "durable":      false,
-                    "autoDelete":   false,
-                    "confirm":      true
-                },
-                "queue":    {
-                    "name":         "consumer_test",
-                    "routingKey":   "test",
-                    "durable":      false,
-                    "autoDelete":   true
-                },
-                "publisher":    false,
-                "consumer":     true
-          }
+		  "connections": {
+              "producer_example": {
+                  "amqpHost":   "rabbitmq01.example.com",
+                    "amqpUser":     "example_user",
+                    "amqpPassword": "example_password",
+                    "amqpPort" :    5672,
+                    "amqpvHost" :   "sensu",
+                    "exchange":     {
+                        "name":         "example_exchange",
+                        "type":         "direct",
+                        "routingKey":   "test",
+                        "durable":      false,
+                        "autoDelete":   false,
+                        "confirm":      true
+                    },
+                    "queue":    {
+                        "durable":      false,
+                        "autoDelete":   true
+                    },
+                    "publisher":    true,
+                    "consumer":     false
+              },
+              "consumer_example": {
+                  "amqpHost":   "rabbitmq02.example.com",
+                    "amqpUser":     "example_user",
+                    "amqpPassword": "example_password",
+                    "amqpPort" :    5672,
+                    "amqpvHost" :   "sensu",
+                    "exchange":     {
+                        "name":         "example_exchange",
+                        "type":         "direct",
+                        "durable":      false,
+                        "autoDelete":   false,
+                        "confirm":      true
+                    },
+                    "queue":    {
+                        "name":         "consumer_test",
+                        "routingKey":   "test",
+                        "durable":      false,
+                        "autoDelete":   true
+                    },
+                    "publisher":    false,
+                    "consumer":     true
+              }
+            }
         },
         "redis": {
               "enabled":  false,

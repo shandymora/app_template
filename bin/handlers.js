@@ -133,6 +133,12 @@ function sendfile(response, filename) {
 	});
 }
 
+// Example amqp message handler
+function amqp_parse_message (channel, message) {
+	console.log('Handled received message: '+message.content.toString());
+	channel.ack(message);
+}
+
 // Export variables/functions
 exports.appHealth = appHealth;
 exports.sendfile = sendfile;
